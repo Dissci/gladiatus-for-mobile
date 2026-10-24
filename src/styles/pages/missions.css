@@ -1,0 +1,42 @@
+/*
+ * Pantheon missions: each row is 532 px with the title and rewards absolute
+ * at x = 20 (420 px) and the progress / state box absolute at x = 440.
+ * On a phone: title, rewards, then progress, stacked at full width.
+ */
+
+@media (max-width: 899px) {
+	/* !important: like quest rows, the game may set inline heights */
+	html.gfm-page-missions #content .missions_data {
+		width: auto;
+		height: auto !important;
+		min-height: 61px;
+		margin-left: 0;
+		padding: 8px 12px;
+		box-sizing: border-box;
+	}
+	html.gfm-page-missions #content .missions_slot_title,
+	html.gfm-page-missions #content .missions_slot_reward_box {
+		position: static;
+		width: auto;
+		height: auto;
+	}
+	html.gfm-page-missions #content .missions_slot_reward_box {
+		display: flow-root;
+		margin-top: 4px;
+	}
+	html.gfm-page-missions #content .missions_slot_reward {
+		width: auto;
+		margin-right: 6px;
+		white-space: nowrap;
+	}
+	/* stays relative: the progress bar inside it is absolute */
+	html.gfm-page-missions #content .missions_slot_state {
+		position: relative;
+		left: auto;
+		top: auto;
+		width: auto;
+		max-width: 100%;
+		margin-top: 4px;
+		text-align: left;
+	}
+}

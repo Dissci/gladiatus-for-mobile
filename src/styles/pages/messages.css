@@ -1,0 +1,27 @@
+/*
+ * Messages: each message is a floated 514 px box with a 490 px subject and a
+ * 480 px body, and Move / Delete / Report on the right of the body.
+ */
+
+@media (max-width: 899px) {
+	html.gfm-page-messages #content .message_box {
+		float: none;
+		width: auto;
+	}
+	html.gfm-page-messages #content .messageSubject,
+	html.gfm-page-messages #content .message_box_content {
+		float: none;
+		width: auto;
+		box-sizing: border-box;
+	}
+	html.gfm-page-messages #content .message_title,
+	html.gfm-page-messages #content .message_text {
+		width: auto;
+		max-width: 100%;
+		overflow-wrap: anywhere;
+	}
+	html.gfm-page-messages #content .message_box_content {
+		padding-left: var(--gfm-gap);
+		padding-right: var(--gfm-gap);
+	}
+}

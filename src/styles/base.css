@@ -12,6 +12,8 @@
 	--gfm-paper: #e7deb8;
 	--gfm-touch: 44px;
 	--gfm-gap: 8px;
+	/* above the Gameforge bar and GCA's fixed bars, which use very high z-indexes */
+	--gfm-z: 2147483000;
 }
 
 /* our own elements exist at every width, but are shown only on phones */
@@ -32,6 +34,10 @@
 		min-height: 0;
 		background-position: 50% 0;
 	}
+	/* room to scroll the last controls above the floating menu button */
+	html.gfm body {
+		padding-bottom: calc(var(--gfm-touch) + var(--gfm-gap) * 4);
+	}
 	html.gfm #container_game,
 	html.gfm #main,
 	html.gfm #main_inner {
@@ -46,7 +52,6 @@
 		height: auto;
 		margin: 0;
 		padding: var(--gfm-gap);
-		padding-left: calc(var(--gfm-touch) + var(--gfm-gap) * 2);
 		background: var(--gfm-bar-bg);
 		color: var(--gfm-bar-fg);
 		display: flex;
@@ -62,6 +67,8 @@
 		position: relative !important;
 		left: auto !important;
 		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
 		float: none;
 		margin: 0;
 		max-width: 100%;
@@ -139,21 +146,28 @@
 	}
 
 	/* --- sidebar → off-canvas drawer --- */
+	/* Above everything: the Gameforge bar and GCA's fixed bars otherwise cover
+	   the button and the drawer. Hidden (not only moved) while closed, because
+	   parts of GCA's menu stick out of the sidebar box. */
 	html.gfm #sidebar {
 		position: fixed;
 		top: 0;
 		bottom: 0;
 		left: 0;
-		z-index: 1000;
-		width: 260px;
+		z-index: calc(var(--gfm-z) + 1);
+		width: min(280px, 85vw);
 		margin: 0;
 		padding: var(--gfm-gap);
+		box-sizing: border-box;
 		overflow-y: auto;
+		background-color: var(--gfm-bar-bg);
 		transform: translateX(-105%);
-		transition: transform 0.2s ease;
+		visibility: hidden;
+		transition: transform 0.2s ease, visibility 0.2s;
 	}
 	html.gfm.gfm-menu-open #sidebar {
 		transform: none;
+		visibility: visible;
 	}
 	html.gfm #sidebar_inner {
 		width: auto;
@@ -168,25 +182,29 @@
 		line-height: var(--gfm-touch);
 	}
 
+	/* floating, bottom left: in thumb reach, and clear of the bars at the top */
 	#gfm-menu-button {
 		display: block;
 		position: fixed;
-		top: var(--gfm-gap);
-		left: var(--gfm-gap);
-		z-index: 1001;
-		width: var(--gfm-touch);
-		height: var(--gfm-touch);
+		left: calc(var(--gfm-gap) * 1.5);
+		bottom: calc(var(--gfm-gap) * 1.5 + env(safe-area-inset-bottom, 0px));
+		z-index: calc(var(--gfm-z) + 2);
+		width: calc(var(--gfm-touch) + 4px);
+		height: calc(var(--gfm-touch) + 4px);
+		padding: 0;
 		border: 1px solid var(--gfm-accent);
-		border-radius: 6px;
+		border-radius: 50%;
 		background: var(--gfm-bar-bg);
 		color: var(--gfm-bar-fg);
-		font-size: 22px;
+		font-size: 24px;
+		line-height: 1;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 	}
 	html.gfm.gfm-menu-open #gfm-menu-backdrop {
 		display: block;
 		position: fixed;
 		inset: 0;
-		z-index: 999;
+		z-index: var(--gfm-z);
 		background: rgba(0, 0, 0, 0.5);
 	}
 

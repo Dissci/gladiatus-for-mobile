@@ -22,7 +22,8 @@ before(async () => {
 	page.on('request', (request) => {
 		if (request.url().startsWith(GAME_URL)) {
 			const mod = new URL(request.url()).searchParams.get('mod') || 'overview';
-			const body = shellPage(BODY_ID[mod] || 'overviewPage', { beforeHead: `<script>${userscript}</script>` });
+			const gca = new URL(request.url()).searchParams.has('gca');
+			const body = shellPage(BODY_ID[mod] || 'overviewPage', { beforeHead: `<script>${userscript}</script>`, gca });
 			request.respond({ status: 200, contentType: 'text/html; charset=utf-8', body });
 		} else {
 			request.abort();
@@ -34,8 +35,8 @@ after(async () => {
 	await browser?.close();
 });
 
-async function open(mod) {
-	await page.goto(gameUrl(mod));
+async function open(mod, options) {
+	await page.goto(gameUrl(mod, options));
 	return page.evaluate(measure);
 }
 
@@ -62,6 +63,14 @@ test('fit page lays out at 560 px and fits it', async () => {
 	assert.ok(m.scrollWidth <= m.layoutWidth, `page is ${m.scrollWidth} px wide in a ${m.layoutWidth} px viewport`);
 	assert.equal(m.content.width, 540);
 	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
+});
+
+test('header: no overlaps, vanilla and with GCA', async () => {
+	for (const gca of [false, true]) {
+		const m = await open('location', { gca });
+		assert.deepEqual(m.overlaps, [], `gca=${gca}`);
+		assert.ok(m.buttonOnTop, `gca=${gca}: ${m.atButton} covers the menu button`);
+	}
 });
 
 test('menu drawer opens by tap', async () => {

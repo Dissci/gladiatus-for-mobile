@@ -18,9 +18,74 @@
 		gap: 4px;
 	}
 
+	/*
+	 * GCA's "top fixed bar": past a scroll offset GCA adds *-fixed-bar classes
+	 * to the game's header values, and its CSS pins them with position:fixed
+	 * at their desktop x positions (left:auto + margin offsets). In the reflowed
+	 * header they pile up on each other and on the bar's title. On phones the
+	 * values stay in the header and the bar is not shown. Sizes are the game's
+	 * own (game.css), which GCA shrinks for the bar.
+	 */
 	html.gfm #topFixedBar {
-		max-width: 100vw;
-		overflow-x: auto;
+		display: none !important;
+	}
+	html.gfm [class*="-fixed-bar"] {
+		position: relative !important;
+		top: auto !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		z-index: auto !important;
+	}
+	html.gfm [class*="-fixed-bar"] .headericon_big,
+	html.gfm .icon_expeditionpoints-fixed-bar,
+	html.gfm .icon_dungeonpoints-fixed-bar {
+		width: 25px !important;
+		height: 25px !important;
+		margin-top: 0;
+		border-radius: 0;
+	}
+	html.gfm [class*="-fixed-bar"] .headervalue_big,
+	html.gfm .expeditionpoints_value-fixed-bar,
+	html.gfm .dungeonpoints_value-fixed-bar {
+		font-size: 16px !important;
+		margin-top: 2px;
+	}
+	html.gfm #header_values_hp.header_values_hp-fixed-bar #header_values_hp_points {
+		margin-top: 0;
+		padding-right: 0;
+		font-size: inherit;
+		text-align: inherit;
+	}
+	html.gfm #header_values_hp.header_values_hp-fixed-bar #header_life_pot {
+		display: inline;
+	}
+
+	/*
+	 * GCA's "move event bar" (html.event_bar_moved, .glfix) shifts the event
+	 * banner 152-155 px down, the sub-tabs and the content 25 px, and puts its
+	 * event timer at x = 350, 400 px wide, all with !important. #container_game
+	 * in the selectors outranks GCA's rules.
+	 */
+	html.gfm.event_bar_moved #container_game #banner_event,
+	html.gfm.event_bar_moved #container_game #banner_top {
+		top: auto !important;
+		z-index: auto !important;
+	}
+	html.gfm.event_bar_moved #container_game #mainnav {
+		bottom: auto !important;
+	}
+	html.gfm.event_bar_moved #container_game #content {
+		margin-top: 0 !important;
+	}
+	html.gfm #container_game #cooldown_bar_event {
+		position: relative !important;
+		left: auto !important;
+		right: auto !important;
+		top: auto !important;
+		width: auto !important;
+		max-width: 100%;
+		margin: 0 !important;
+		flex: 1 1 100%;
 	}
 
 	html.gfm .gca_advance_main_menu .advanced_menu_shift {

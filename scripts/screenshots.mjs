@@ -46,9 +46,10 @@ for (const file of pages) {
 			const m = await page.evaluate(() => {
 				const layout = document.documentElement.clientWidth;
 				// content cut off at the screen edge: overflow-x:hidden hides it from scrollWidth.
-				// Anything inside its own scroll box (tables, #mainnav) is fine.
+				// Anything inside its own scroll box (tables, #mainnav) is fine; the
+				// last-resort scroll on #content itself is not.
 				const scrolls = (el) => {
-					for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+					for (let e = el.parentElement; e && e !== document.body && e.id !== 'content'; e = e.parentElement) {
 						if (/auto|scroll/.test(getComputedStyle(e).overflowX)) return true;
 					}
 					return false;

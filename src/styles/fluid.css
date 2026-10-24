@@ -7,6 +7,25 @@
 		width: auto;
 		padding: var(--gfm-gap);
 		font-size: 14px;
+		/* last resort: anything not yet reflowed scrolls sideways inside the
+		   content instead of being cut off with its buttons unreachable */
+		overflow-x: auto;
+	}
+
+	/* Pantheon / missions boards: every part is a 555 px background image */
+	html.gfm-fluid #content [class^="contentboard_"],
+	html.gfm-fluid #content [class*=" contentboard_"] {
+		width: auto;
+		max-width: 100%;
+		box-sizing: border-box;
+		background-size: 100% 100%;
+	}
+	html.gfm-fluid #content .contentboard_start {
+		margin-left: 0;
+	}
+	html.gfm-fluid #content .contentboard_inner {
+		padding-left: 0;
+		padding-right: 0;
 	}
 	html.gfm-fluid #content div.contentItem,
 	html.gfm-fluid #content div.contentItem div.contentItem_content,
@@ -14,6 +33,15 @@
 		width: auto;
 		float: none;
 		box-sizing: border-box;
+	}
+
+	/* pagination: the numbers fit between the « ‹ and › » buttons (at 20/50 px from each side) */
+	html.gfm-fluid #content .paging_numbers {
+		left: 80px;
+		right: 80px;
+		width: auto;
+		overflow-x: auto;
+		white-space: nowrap;
 	}
 
 	/* tables scroll in their own box (wrappers come from layout.js) */

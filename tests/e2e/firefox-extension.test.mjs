@@ -29,7 +29,7 @@ before(async () => {
 		const url = new URL(request.url());
 		if (request.url().startsWith(GAME_URL)) {
 			const mod = url.searchParams.get('mod') || 'overview';
-			request.respond({ status: 200, contentType: 'text/html; charset=utf-8', body: shellPage(BODY_ID[mod] || 'overviewPage') });
+			request.respond({ status: 200, contentType: 'text/html; charset=utf-8', body: shellPage(BODY_ID[mod] || 'overviewPage', { gca: url.searchParams.has('gca') }) });
 		} else {
 			request.abort();
 		}
@@ -40,9 +40,9 @@ after(async () => {
 	await browser?.close();
 });
 
-async function open(mod, width) {
+async function open(mod, width, options) {
 	await page.setViewport({ width, height: 800 });
-	await page.goto(gameUrl(mod));
+	await page.goto(gameUrl(mod, options));
 	return page.evaluate(measure);
 }
 
@@ -77,6 +77,27 @@ test('menu drawer opens and closes', async () => {
 	await page.mouse.click(370, 400); // the backdrop, right of the drawer
 	await page.waitForFunction(() => document.getElementById('sidebar').getBoundingClientRect().right <= 0);
 	assert.equal((await page.evaluate(measure)).menuOpen, false);
+});
+
+test('menu button is on top of everything, also with GCA and scrolled', async () => {
+	for (const gca of [false, true]) {
+		let m = await open('location', 390, { gca });
+		assert.ok(m.buttonOnTop, `gca=${gca}: ${m.atButton} covers the menu button`);
+		await page.evaluate(() => window.scrollTo(0, 400));
+		m = await page.evaluate(measure);
+		assert.ok(m.buttonOnTop, `gca=${gca}, scrolled: ${m.atButton} covers the menu button`);
+	}
+	await page.click('#gfm-menu-button');
+	await page.waitForFunction(() => document.getElementById('sidebar').getBoundingClientRect().left >= 0);
+	const inDrawer = await page.evaluate(() => !!document.elementFromPoint(60, 300).closest('#sidebar'));
+	assert.ok(inDrawer, 'the open drawer is on top');
+});
+
+test('GCA: header values stay in the header, nothing overlaps', async () => {
+	const m = await open('location', 390, { gca: true });
+	assert.deepEqual(m.overlaps, []);
+	assert.equal(m.fixedBarShown, false, "GCA's top fixed bar is hidden on phones");
+	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
 });
 
 test('fit page: native content width, fit viewport tag', async () => {

@@ -29,7 +29,10 @@
 				"styles/fluid.css",
 				"styles/compat-gca.css",
 				"styles/pages/location.css",
-				"styles/pages/dungeon.css"
+				"styles/pages/dungeon.css",
+				"styles/pages/quests.css",
+				"styles/pages/missions.css",
+				"styles/pages/messages.css"
 			]
 		}
 	]

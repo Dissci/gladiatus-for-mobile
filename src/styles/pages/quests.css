@@ -1,0 +1,42 @@
+/*
+ * Pantheon quests: a quest row is a 555 px box with the title and rewards
+ * absolute at x = 70 (420 px wide) and the accept / cancel / finish buttons
+ * absolute at the right edge. The row now takes the screen width, so the
+ * buttons stay in view; title and rewards flow in the space beside them.
+ */
+
+@media (max-width: 899px) {
+	/* !important: the game script sets an inline height on each row */
+	html.gfm-page-quests #content .contentboard_slot {
+		height: auto !important;
+		min-height: 63px;
+		padding: 8px 56px 8px 70px;
+	}
+	html.gfm-page-quests #content .quest_slot_title,
+	html.gfm-page-quests #content .quest_slot_reward_box,
+	html.gfm-page-quests #content .quest_slot_time {
+		position: static;
+		width: auto;
+		height: auto;
+	}
+	html.gfm-page-quests #content .quest_slot_reward_box {
+		display: flow-root;
+		margin-top: 4px;
+	}
+	/* reward cells are 18-70 px wide on desktop; at this width they wrap the number above the icon */
+	html.gfm-page-quests #content .quest_slot_reward {
+		width: auto;
+		max-width: 100%;
+		margin-right: 6px;
+		white-space: nowrap;
+	}
+	html.gfm-page-quests #content .quest_slot_reward_item_detailed {
+		white-space: normal;
+	}
+	/* the buttons are 30 px images; give them a 44 px tap area around them */
+	html.gfm-page-quests #content a.quest_slot_button::before {
+		content: "";
+		position: absolute;
+		inset: -7px;
+	}
+}

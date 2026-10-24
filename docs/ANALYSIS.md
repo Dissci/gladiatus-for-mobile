@@ -311,13 +311,24 @@ Rules for this file (enforced in review, documented in `CONTRIBUTING.md`):
 
 - `html.gca_enable_xscroll`: restore `overflow-x:hidden` in GfM mode. We
   provide a layout that fits, so x-scroll is no longer needed.
-- `#gca_shortcuts_bar` and `#topFixedBar`: fold into the status bar or the
-  drawer.
+- `#gca_shortcuts_bar`: folded into the status bar.
+- `#topFixedBar` ("top fixed bar"): past a scroll offset GCA adds
+  `*-fixed-bar` classes to the game's header values, and its CSS pins them
+  with `position: fixed` at their desktop x positions. In a reflowed header
+  they pile up, so on phones the values stay in the header and the bar is
+  hidden.
 - `.gca_advance_main_menu .advanced_menu_entry`: make the "+" sub-link toggles
   44 px wide inside the drawer.
-- `html.event_bar_moved`: neutralise GCA's absolute offsets.
-- The test matrix always covers **vanilla** and **with GCA** (the saved pages
-  are already the "with GCA" fixtures).
+- `html.event_bar_moved` / `.glfix`: GCA moves the event banner 152-155 px
+  down, the sub-tabs and content 25 px, and its event timer to x = 350, all
+  `!important`. Undone with selectors that outrank GCA's.
+- **The saved pages contain GCA's HTML but not its stylesheet** (GCA injects
+  it at runtime). GCA conflicts therefore do not show in `npm run preview`;
+  they showed on the first phone session. The browser-test page
+  (`tests/e2e/shell-page.mjs`) carries the GCA rules GfM undoes, with
+  attribution (GCA is GPL-3.0), and every shell test runs with and without
+  them. Check new GCA rules against `source/core/resources/style_gca.css` in
+  the GCA repository.
 
 ### 4.7 Delivery targets
 

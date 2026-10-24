@@ -9,27 +9,34 @@ on a real page, `[ ]` not started.
 ## Next steps (in this order)
 
 Every change can now be seen in seconds without logging in (`npm run preview`,
-`npm run shots`), and CI runs the add-on in real Firefox on each push. The
-work now is making the drafted shell actually fit.
+`npm run shots`), and CI runs the add-on in real Firefox on each push.
+
+**First phone session (2026-10-24, Android 16, Firefox with GCA):** the menu
+drawer could not be opened, the top of the page was a pile-up, and in the
+pantheon the accept / decline buttons were off screen and unreachable. All
+three are fixed (see Done) and covered by browser tests; **re-test on the
+phone is next.** Lesson: saved pages contain GCA's HTML but not GCA's
+stylesheet, so GCA layout conflicts only show on a real device. The test page
+now carries the GCA rules GfM has to undo.
 
 **Overflow report (`npm run shots`, 37 saved pages × 360 / 390 / 412 px = 111 views).**
-It counts a view as bad when the page scrolls sideways *or* content is cut
-off at the screen edge (`overflow-x: hidden` hides the second from
-`scrollWidth`, so both are measured). Re-run after each step and record it here.
+It counts a view as bad when the page scrolls sideways, content is cut off at
+the screen edge, or content needs the last-resort sideways scroll inside
+`#content`. Re-run after each step and record it here.
 
 | Date | Bad views | Note |
 |---|---|---|
 | 2026-10-24 | 111 / 111 | first run: the shell alone was 585 px wide |
-| 2026-10-24 | 27 / 111 | shell fixed (step 1 below, done); 9 pages left, all page content |
+| 2026-10-24 | 27 / 111 | shell fixed; 9 pages left, all page content |
+| 2026-10-24 | 18 / 111 | pantheon quests, missions, messages fixed after the phone session |
 
 | # | Step | Effort | Done when |
 |---|---|---|---|
-| 1 | ~~**Shell-wide overflow**~~ **done**: the Gameforge bar (`#mmoContent` 585 px), `#banner_event` and its link, the cooldown bar fills and links, the HP/XP percentages, the header link row. Header boxes are now `relative` with the desktop offsets reset, so their absolute children stay inside them. Covered by the browser tests | S | No view is bad because of the shell |
-| 2 | **Header status bar.** It fits now, but the values have no icons or labels, "Go to expedition" is cut to "Go to", and GCA's timers float loose. Rebuild it as the grid from [ANALYSIS §4.3](ANALYSIS.md#43-shell-reflow-both-modes), from the real markup in the fixtures | M | Gold, rubies, level, HP/XP, points and the 4 cooldowns readable at 360 px |
-| 3 | **Top of the page.** The ☰ button covers the Gameforge bar's logo, and the bar (absolute, 32 px) overlaps the header's link row. Reserve the bar's height, then put the button in the status bar row | S | Nothing overlaps at 360 px |
-| 4 | **Page content**, from the report: messages (`.message_box`), missions and pantheon (`.contentboard_header_*`), gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), the loot modal (`#blackoutDialog`), merchant inventory tabs (`#inventory_nav`, fit) | M | 0 bad views |
-| 5 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
-| 6 | First device session on Firefox for Android (`npm run android`, setup in the [README](../README.md#testing-on-an-android-phone)): viewport tag honoured in fit and fluid mode, drawer, scrolling, drag-and-drop by finger. The tooling works with a real phone (Android 16, Play Store Firefox); the session itself is pending | S | Phase 1 device check ticked |
+| 1 | **Re-test on the phone** (`npm run android`): drawer, top of the page while scrolling (GCA bar), pantheon accept / decline, messages Move / Delete / Report, missions progress. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
+| 2 | **Header status bar.** It fits and nothing overlaps, but it is still the desktop pieces in a row: values without labels, "Go to expedition" cut to "Go to", GCA's timers loose. Rebuild it as the grid from [ANALYSIS §4.3](ANALYSIS.md#43-shell-reflow-both-modes), from the real markup in the fixtures | M | Gold, rubies, level, HP/XP, points and the 4 cooldowns readable at 360 px |
+| 3 | **Page content**, from the report: gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), the loot modal (`#blackoutDialog`), merchant inventory tabs (`#inventory_nav`, fit) | M | 0 bad views |
+| 4 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
+| 5 | Optional: `npm run preview -- --gca` that adds GCA's stylesheet (fetched from its GitHub release at a pinned version, never committed), so GCA conflicts show in the screenshots too | S | Report run with and without GCA |
 
 ### Done
 
@@ -39,6 +46,8 @@ off at the screen edge (`overflow-x: hidden` hides the second from
 - [x] Viewport tag inserted before `<head>` exists takes effect (Chrome phone emulation, both modes). Firefox Android is still to check on a device (step 6)
 - [x] CI is green on GitHub and now also runs the browser tests (`npm run test:e2e`): the add-on installed in headless Firefox, and the userscript in Chrome phone emulation, both on a test page written for this repo
 - [x] **Bug found and fixed:** the ☰ button showed as a plain button at the bottom of every page on desktop
+- [x] Phone session 1 fixes: **the ☰ button was covered** by the Gameforge bar (and by GCA's fixed bar when scrolled), so the drawer could not open. It is now a floating button at the bottom left, above everything, and the closed drawer is hidden instead of peeking out at the left edge. **GCA's "top fixed bar"** pinned header values at desktop positions when scrolling; on phones they stay in the header and the bar is hidden. **GCA's moved event bar** pushed the banner 155 px into the header; undone. **Pantheon quests, missions and messages** reflow to the screen width, so the accept / decline buttons and Move / Delete / Report are on screen. Anything still too wide now scrolls inside the content instead of being cut off
+- [x] Shell-wide overflow: the Gameforge bar (`#mmoContent` 585 px), `#banner_event` and its link, the cooldown bar fills and links, the HP/XP percentages, the header link row. Header boxes are `relative` with the desktop offsets reset, so their absolute children stay inside them
 - [x] `npm run android` fixed: it targeted Firefox Nightly (`org.mozilla.fenix`) instead of the Play Store Firefox, and web-ext needs the device ID. `scripts/android.mjs` now picks the phone and the installed Firefox, and explains the usual setup errors
 
 ## Phase 0: foundations
@@ -60,7 +69,7 @@ The goal is that every page fits the screen width and the whole game can be navi
 - [x] Browser tests in CI: Firefox add-on + Chrome userscript (`tests/e2e/`)
 - [x] Viewport injection per mode (fit / fluid) at `document_start` (`boot.js`). Verified in Firefox (tag set) and Chrome emulation (tag applied)
 - [~] Shell reflow: wrapper widths, status-bar header (gold, rubies, level, HP/XP, points, cooldowns) (`base.css`). Overflows on every saved page (next steps 1-2)
-- [~] `#mainnav` as a scroll strip, `#mainmenu` as an off-canvas drawer (☰) (`base.css`, `layout.js`). The drawer opens and closes in both browsers; the button covers the Gameforge bar
+- [~] `#mainnav` as a scroll strip, `#mainmenu` as an off-canvas drawer (☰) (`base.css`, `layout.js`). The drawer opens on all 37 saved pages and in both test browsers, also with GCA; phone re-test pending
 - [~] Footer, banners and buff bar repositioned (ads kept, not hidden). The buff bar has no rule yet
 - [~] Location page: enemy cards 2×2, 44 px attack buttons (`pages/location.css`). Looks right in the screenshots; device check pending
 - [~] Dungeon: fit mode, map stays at native size and is centred (`pages/dungeon.css`, centring missing)
@@ -76,8 +85,9 @@ The goal is that every page fits the screen width and the whole game can be navi
 - [ ] MutationObserver on `#content` for AJAX-replaced fragments (ANALYSIS §4.2 step 6), debounced, re-runs the table wrapping only
 - [ ] Reports: stacked battle rounds
 - [ ] Highscore, arena, circus lists
-- [ ] Pantheon quests, missions, gods: card layouts
-- [ ] Messages: folders into a select, full-width compose
+- [~] Pantheon quests, missions: rows reflow, buttons on screen (`pages/quests.css`, `pages/missions.css`); phone re-test pending
+- [ ] Gods: card layout
+- [~] Messages: full-width message boxes and pagination (`pages/messages.css`); folders into a select, compose not started
 - [ ] Guild pages (bank, medic, building map)
 - [~] Tooltips sized to the viewport (one `max-width` rule; needs checking with the game's `.mobile` tooltip mode)
 - [ ] Save and cover the missing pages (training, forge, work, costumes, stats, settings), see [PAGE-INVENTORY](PAGE-INVENTORY.md#not-saved-yet-save-these-next)
@@ -93,7 +103,7 @@ The goal is that every page fits the screen width and the whole game can be navi
 ## Phase 4: reach, target v0.4 (M)
 
 - [ ] Userscript build tested on iOS Safari (*Userscripts* app) and Tampermonkey
-- [~] GCA compatibility layer complete (shortcuts bar, fixed top bar, advanced menu, event bar). First rules are in `compat-gca.css`; the event bar is missing
+- [~] GCA compatibility layer complete (shortcuts bar, fixed top bar, advanced menu, event bar). Fixed top bar and moved event bar handled (`compat-gca.css`), checked against GCA's own CSS; shortcuts bar and advanced menu not checked on a device yet
 - [ ] Options page: fit width (540-600), per-page on/off, text size (adds the `storage` permission; update the compliance test in its own PR)
 - [ ] RTL servers; underworld skin
 - [ ] Chat overlay fits the screen
