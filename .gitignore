@@ -7,3 +7,6 @@ fixtures/
 *_files/
 *.htm
 *.html
+
+# local scratch scripts
+*.tmp.mjs
