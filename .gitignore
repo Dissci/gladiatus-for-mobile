@@ -1,0 +1,9 @@
+node_modules/
+dist/
+web-ext-artifacts/
+
+# Saved game pages: Gameforge assets + session tokens (sh=, csrf). Never commit.
+fixtures/
+*_files/
+*.htm
+*.html

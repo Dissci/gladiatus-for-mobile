@@ -1,0 +1,12 @@
+/*
+ * Dungeon: <map>/<area> coordinates do not scale with CSS, so the map image
+ * must keep its native size. Fit mode lets the browser scale the whole page.
+ */
+
+@media (max-width: 899px) {
+	html.gfm-page-dungeon #content img[usemap] {
+		width: auto !important;
+		height: auto !important;
+		max-width: none !important;
+	}
+}

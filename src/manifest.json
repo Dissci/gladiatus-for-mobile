@@ -1,0 +1,36 @@
+{
+	"manifest_version": 3,
+	"name": "Gladiatus for mobile (unofficial)",
+	"short_name": "GfM",
+	"version": "0.0.1",
+	"description": "Unofficial, community-made mobile layout for the Gladiatus browser game. Presentation only: no automation, no server requests, no data collection.",
+	"homepage_url": "https://github.com/Dissci/gladiatus-for-mobile",
+
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "gladiatus-for-mobile@community",
+			"strict_min_version": "140.0",
+			"data_collection_permissions": {
+				"required": ["none"]
+			}
+		},
+		"gecko_android": {
+			"strict_min_version": "142.0"
+		}
+	},
+
+	"content_scripts": [
+		{
+			"matches": ["https://*.gladiatus.gameforge.com/game/index.php*"],
+			"run_at": "document_start",
+			"js": ["lib/pages.js", "content/boot.js", "content/layout.js"],
+			"css": [
+				"styles/base.css",
+				"styles/fluid.css",
+				"styles/compat-gca.css",
+				"styles/pages/location.css",
+				"styles/pages/dungeon.css"
+			]
+		}
+	]
+}

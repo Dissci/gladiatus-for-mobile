@@ -1,0 +1,39 @@
+/*
+ * Gladiatus Crazy Addon compatibility (docs/ANALYSIS.md §4.6).
+ * Scoped to GCA's own root classes so it is inert without GCA.
+ */
+
+@media (max-width: 899px) {
+	/* our layout fits, GCA's x-scroll is no longer needed */
+	html.gfm.gca_enable_xscroll,
+	html.gfm.gca_enable_xscroll body {
+		overflow-x: hidden;
+	}
+
+	html.gfm #gca_shortcuts_bar {
+		position: static;
+		flex: 1 1 100%;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	html.gfm #topFixedBar {
+		max-width: 100vw;
+		overflow-x: auto;
+	}
+
+	html.gfm .gca_advance_main_menu .advanced_menu_shift {
+		min-width: var(--gfm-touch);
+		min-height: var(--gfm-touch);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	html.gfm.gca_mobile_device .accessibility-item-move-bar {
+		left: 0;
+		right: 0;
+		min-height: var(--gfm-touch);
+	}
+}

@@ -1,0 +1,181 @@
+/*
+ * Shell reflow for both modes (docs/ANALYSIS.md §4.3).
+ * Everything is gated by html.gfm and a max-width query, so desktops are untouched.
+ * Never scale elements (transform/zoom): it breaks the game's drag-and-drop math.
+ */
+
+:root {
+	--gfm-fit-width: 560px;
+	--gfm-bar-bg: #2b1d10;
+	--gfm-bar-fg: #e8d9a8;
+	--gfm-accent: #bba86e;
+	--gfm-paper: #e7deb8;
+	--gfm-touch: 44px;
+	--gfm-gap: 8px;
+}
+
+@media (max-width: 899px) {
+
+	/* --- wrappers: drop the 920/960 px minimums --- */
+	html.gfm,
+	html.gfm body {
+		overflow-x: hidden;
+	}
+	html.gfm #wrapper_game {
+		min-width: 0;
+		min-height: 0;
+		background-position: 50% 0;
+	}
+	html.gfm #container_game,
+	html.gfm #main,
+	html.gfm #main_inner {
+		width: auto;
+		float: none;
+		top: 0;
+	}
+
+	/* --- header → compact status bar --- */
+	html.gfm #header_game {
+		width: auto;
+		height: auto;
+		margin: 0;
+		padding: var(--gfm-gap);
+		padding-left: calc(var(--gfm-touch) + var(--gfm-gap) * 2);
+		background: var(--gfm-bar-bg);
+		color: var(--gfm-bar-fg);
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px var(--gfm-gap);
+		align-items: center;
+		text-align: left;
+	}
+	html.gfm #header_game > div,
+	html.gfm #header_game > ul {
+		position: static !important;
+		float: none;
+		margin: 0;
+	}
+	html.gfm #header_values_hp,
+	html.gfm #header_values_xp {
+		flex: 1 1 40%;
+	}
+	html.gfm #header_game .cooldown_bar {
+		flex: 1 1 calc(25% - var(--gfm-gap));
+		min-width: 70px;
+	}
+	html.gfm #header_values_hp_xp_background,
+	html.gfm #banner_top {
+		display: none;
+	}
+
+	/* --- module sub-tabs → horizontal scroll strip --- */
+	html.gfm ul#mainnav {
+		flex: 1 1 100%;
+		width: auto;
+		height: auto;
+		padding: 0;
+		overflow-x: auto;
+		background: none;
+		scroll-snap-type: x proximity;
+	}
+	html.gfm ul#mainnav table {
+		top: 0 !important;
+		height: auto !important;
+	}
+	html.gfm ul#mainnav a {
+		min-height: var(--gfm-touch);
+		white-space: nowrap;
+		scroll-snap-align: start;
+	}
+
+	/* --- sidebar → off-canvas drawer --- */
+	html.gfm #sidebar {
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 1000;
+		width: 260px;
+		margin: 0;
+		padding: var(--gfm-gap);
+		overflow-y: auto;
+		transform: translateX(-105%);
+		transition: transform 0.2s ease;
+	}
+	html.gfm.gfm-menu-open #sidebar {
+		transform: none;
+	}
+	html.gfm #sidebar_inner {
+		width: auto;
+		margin: 0;
+		padding: 0;
+	}
+	html.gfm #sidebar_footer {
+		display: none;
+	}
+	html.gfm #mainmenu a.menuitem {
+		min-height: var(--gfm-touch);
+		line-height: var(--gfm-touch);
+	}
+
+	#gfm-menu-button {
+		position: fixed;
+		top: var(--gfm-gap);
+		left: var(--gfm-gap);
+		z-index: 1001;
+		width: var(--gfm-touch);
+		height: var(--gfm-touch);
+		border: 1px solid var(--gfm-accent);
+		border-radius: 6px;
+		background: var(--gfm-bar-bg);
+		color: var(--gfm-bar-fg);
+		font-size: 22px;
+	}
+	#gfm-menu-backdrop {
+		display: none;
+	}
+	html.gfm.gfm-menu-open #gfm-menu-backdrop {
+		display: block;
+		position: fixed;
+		inset: 0;
+		z-index: 999;
+		background: rgba(0, 0, 0, 0.5);
+	}
+
+	/* --- content --- */
+	html.gfm #content {
+		float: none;
+		margin: 0 auto;
+		padding: var(--gfm-gap) 0;
+	}
+	html.gfm.gfm-fit #content {
+		width: 540px;
+	}
+
+	/* --- footer and ad slots: repositioned, never hidden --- */
+	html.gfm #footer {
+		width: auto;
+		height: auto;
+		margin: 0;
+		padding: var(--gfm-gap);
+	}
+	html.gfm #footer_background {
+		display: none;
+	}
+	html.gfm #footer div#footer_inner,
+	html.gfm div#footer_logos {
+		position: static;
+		width: auto;
+	}
+	html.gfm #banner_right,
+	html.gfm .banner1 {
+		position: static;
+		margin: var(--gfm-gap) auto;
+	}
+
+	/* --- tooltips fit the screen --- */
+	html.gfm .tooltip,
+	html.gfm #tooltip {
+		max-width: calc(100vw - 16px);
+	}
+}

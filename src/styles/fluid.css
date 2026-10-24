@@ -1,0 +1,40 @@
+/*
+ * Fluid-mode content rules (docs/ANALYSIS.md §4.4): text and list pages.
+ */
+
+@media (max-width: 899px) {
+	html.gfm-fluid #content {
+		width: auto;
+		padding: var(--gfm-gap);
+		font-size: 14px;
+	}
+	html.gfm-fluid #content div.contentItem,
+	html.gfm-fluid #content div.contentItem div.contentItem_content,
+	html.gfm-fluid #content h3:not(.section-header) {
+		width: auto;
+		float: none;
+		box-sizing: border-box;
+	}
+
+	/* tables scroll in their own box (wrappers come from layout.js) */
+	html.gfm-fluid .gfm-scroll {
+		max-width: 100%;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* forms: 16 px stops iOS zooming in on focus */
+	html.gfm-fluid #content input:not([type="checkbox"]):not([type="radio"]),
+	html.gfm-fluid #content select,
+	html.gfm-fluid #content textarea {
+		font-size: 16px;
+		min-height: var(--gfm-touch);
+		max-width: 100%;
+		box-sizing: border-box;
+	}
+	html.gfm-fluid #content .awesome-button,
+	html.gfm-fluid #content input[type="submit"],
+	html.gfm-fluid #content button {
+		min-height: var(--gfm-touch);
+	}
+}
