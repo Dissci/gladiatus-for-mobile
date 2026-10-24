@@ -52,6 +52,7 @@ test('fluid page: classes, viewport tag, no sideways scroll', async () => {
 	assert.equal(m.viewport, 'width=device-width, initial-scale=1');
 	assert.ok(m.scrollWidth <= m.layoutWidth, `page is ${m.scrollWidth} px wide in a ${m.layoutWidth} px viewport`);
 	assert.ok(m.content.right <= m.layoutWidth, `#content ends at ${m.content.right}`);
+	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
 	assert.ok(m.tableWrapped, 'wide table is wrapped in .gfm-scroll');
 });
 

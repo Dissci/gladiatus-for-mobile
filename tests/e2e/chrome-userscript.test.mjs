@@ -44,6 +44,15 @@ test('fluid page lays out at the phone width without sideways scroll', async () 
 	assert.equal(m.classes, 'gfm gfm-fluid gfm-page-location');
 	assert.equal(m.layoutWidth, 390);
 	assert.ok(m.scrollWidth <= m.layoutWidth, `page is ${m.scrollWidth} px wide in a ${m.layoutWidth} px viewport`);
+	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
+});
+
+test('fluid page fits at 360 px too', async () => {
+	await page.setViewport({ ...PHONE, width: 360 });
+	const m = await open('location');
+	await page.setViewport(PHONE);
+	assert.equal(m.layoutWidth, 360);
+	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
 });
 
 test('fit page lays out at 560 px and fits it', async () => {
@@ -52,6 +61,7 @@ test('fit page lays out at 560 px and fits it', async () => {
 	assert.equal(m.layoutWidth, 560);
 	assert.ok(m.scrollWidth <= m.layoutWidth, `page is ${m.scrollWidth} px wide in a ${m.layoutWidth} px viewport`);
 	assert.equal(m.content.width, 540);
+	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
 });
 
 test('menu drawer opens by tap', async () => {

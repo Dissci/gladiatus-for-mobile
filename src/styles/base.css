@@ -55,11 +55,27 @@
 		align-items: center;
 		text-align: left;
 	}
+	/* in the flow, but still the containing block of their absolute children
+	   (bar fills, percentages), which would otherwise span the whole page */
 	html.gfm #header_game > div,
 	html.gfm #header_game > ul {
-		position: static !important;
+		position: relative !important;
+		left: auto !important;
+		top: auto !important;
 		float: none;
 		margin: 0;
+		max-width: 100%;
+	}
+	/* top links row (Help, Profile, … Logout, server time) */
+	html.gfm #header_game > .container {
+		flex: 1 1 100%;
+		flex-wrap: wrap;
+		gap: 0 var(--gfm-gap);
+	}
+	html.gfm #header_values_hp_percent,
+	html.gfm #header_values_xp_percent {
+		left: auto;
+		right: 4px;
 	}
 	html.gfm #header_values_hp,
 	html.gfm #header_values_xp {
@@ -69,9 +85,37 @@
 		flex: 1 1 calc(25% - var(--gfm-gap));
 		min-width: 70px;
 	}
+	/* the link covers the bar; the game sizes it for the 138 px desktop bar */
+	html.gfm #header_game .cooldown_bar_link {
+		width: 100%;
+	}
 	html.gfm #header_values_hp_xp_background,
 	html.gfm #banner_top {
 		display: none;
+	}
+
+	/* --- Gameforge network bar: kept, but no wider than the screen --- */
+	html.gfm #mmoContent {
+		width: auto;
+		max-width: 100%;
+	}
+	html.gfm #mmoGame {
+		width: auto;
+		max-width: calc(100% - 108px);
+	}
+
+	/* --- event banner: under the header instead of at x = 353 --- */
+	html.gfm #banner_event {
+		position: relative;
+		left: auto;
+		top: auto;
+		width: auto;
+		max-width: 100%;
+		background-size: cover;
+		background-position: center;
+	}
+	html.gfm #banner_event_link {
+		width: 100%;
 	}
 
 	/* --- module sub-tabs → horizontal scroll strip --- */

@@ -28,6 +28,14 @@ ul#mainnav table { position: relative; top: 4px; }
 #footer_inner { position: absolute; left: 100px; top: 200px; width: 720px; }
 #banner_right { position: absolute; left: 882px; top: 0; width: 160px; height: 600px; }
 #expedition_list .expedition_box { float: left; width: 123px; height: 142px; margin: 0 5px; }
+.cooldown_bar_fill { position: absolute; left: 2px; top: 1px; width: 100%; height: 16px; }
+.cooldown_bar_link { position: absolute; left: 0; top: 0; width: 138px; height: 20px; }
+#header_values_hp_percent { position: absolute; left: 360px; top: 0; width: 30px; }
+#mmonetbar { position: absolute; top: 0; left: 0; width: 100%; }
+#mmoContent { position: relative; width: 585px; height: 32px; }
+#mmoGame { width: 432px; }
+#banner_event { position: absolute; left: 353px; top: 118px; width: 400px; height: 60px; }
+#banner_event_link { display: block; width: 400px; height: 60px; }
 `;
 
 const CONTENT = {
@@ -48,17 +56,16 @@ export function shellPage(bodyId, options = {}) {
 	return `<!doctype html>
 <html>${options.beforeHead || ''}<head><meta charset="utf-8"><title>GfM test shell</title><style>${GAME_CSS}</style></head>
 <body id="${bodyId}">
+<div id="mmonetbar"><div id="mmoContent"><a id="mmoLogo" href="#">Gameforge</a><div id="mmoGame">More games</div></div></div>
 <div id="wrapper_game"><div id="container_game">
+	<div id="banner_event"><a id="banner_event_link" href="#"></a></div>
 	<div id="header_game">
 		<div id="header_values_gold">1 234 567</div>
 		<div id="header_values_ruby">42</div>
 		<div id="header_values_level">87</div>
-		<div id="header_values_hp">HP 1200 / 1500</div>
+		<div id="header_values_hp"><div id="header_values_hp_percent">80%</div>HP 1200 / 1500</div>
 		<div id="header_values_xp">XP 40 %</div>
-		<div id="cooldown_bar_expedition" class="cooldown_bar"><a href="#">Expedition</a></div>
-		<div id="cooldown_bar_dungeon" class="cooldown_bar"><a href="#">Dungeon</a></div>
-		<div id="cooldown_bar_arena" class="cooldown_bar"><a href="#">Arena</a></div>
-		<div id="cooldown_bar_ct" class="cooldown_bar"><a href="#">Circus</a></div>
+		${['expedition', 'dungeon', 'arena', 'ct'].map((c) => `<div id="cooldown_bar_${c}" class="cooldown_bar"><div class="cooldown_bar_fill"></div><a class="cooldown_bar_link" href="#"></a>${c}</div>`).join('\n\t\t')}
 		<ul id="mainnav"><li><table><tr>${[1, 2, 3, 4, 5, 6].map((n) => `<td><a href="#">Sub-tab ${n}</a></td>`).join('')}</tr></table></li></ul>
 	</div>
 	<div id="main"><div id="main_inner">
@@ -85,8 +92,28 @@ export function measure() {
 		const r = el.getBoundingClientRect();
 		return { left: r.left, right: r.right, top: r.top, width: r.width, height: r.height, display: getComputedStyle(el).display };
 	};
+	// how far content reaches past the right edge outside a scroll box: with
+	// overflow-x:hidden that content is cut off, and scrollWidth does not show it
+	const inScrollBox = (el) => {
+		for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+			if (/auto|scroll/.test(getComputedStyle(e).overflowX)) return true;
+		}
+		return false;
+	};
+	let clipped = 0;
+	let clippedBy = null;
+	for (const el of document.body.querySelectorAll('*')) {
+		const r = el.getBoundingClientRect();
+		if (!r.width || !r.height || r.right <= html.clientWidth + 1 || r.left >= html.clientWidth || inScrollBox(el)) continue;
+		if (r.right - html.clientWidth > clipped) {
+			clipped = Math.round(r.right - html.clientWidth);
+			clippedBy = el.id || el.className;
+		}
+	}
 	return {
 		classes: html.className,
+		clipped,
+		clippedBy,
 		viewport: (document.querySelector('meta[name=viewport]') || {}).content || null,
 		layoutWidth: html.clientWidth,
 		scrollWidth: html.scrollWidth,

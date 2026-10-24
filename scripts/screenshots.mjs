@@ -43,11 +43,35 @@ for (const file of pages) {
 		for (const gfm of [true, false]) {
 			await page.setViewport({ width, height: 800, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
 			await page.goto(base + encodeURI(file) + (gfm ? '' : '?gfm=0'), { waitUntil: 'load', timeout: 30000 });
-			const m = await page.evaluate(() => ({
-				mode: (document.documentElement.className.match(/\bgfm-(fit|fluid)\b/) || [])[1] || '-',
-				layout: document.documentElement.clientWidth,
-				scroll: document.documentElement.scrollWidth,
-			}));
+			const m = await page.evaluate(() => {
+				const layout = document.documentElement.clientWidth;
+				// content cut off at the screen edge: overflow-x:hidden hides it from scrollWidth.
+				// Anything inside its own scroll box (tables, #mainnav) is fine.
+				const scrolls = (el) => {
+					for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+						if (/auto|scroll/.test(getComputedStyle(e).overflowX)) return true;
+					}
+					return false;
+				};
+				let clipped = 0;
+				let worst = '';
+				for (const el of document.body.querySelectorAll('*')) {
+					const r = el.getBoundingClientRect();
+					if (!r.width || !r.height || r.right <= layout + 1 || r.left >= layout) continue;
+					if (getComputedStyle(el).visibility === 'hidden' || scrolls(el)) continue;
+					if (r.right - layout > clipped) {
+						clipped = Math.round(r.right - layout);
+						worst = el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/)[0] : '');
+					}
+				}
+				return {
+					mode: (document.documentElement.className.match(/\bgfm-(fit|fluid)\b/) || [])[1] || '-',
+					layout,
+					scroll: document.documentElement.scrollWidth,
+					clipped,
+					worst,
+				};
+			});
 			const name = `${file.replace(/\.html?$/, '').replace(/\//g, '__')}-${width}-${gfm ? 'gfm' : 'off'}.png`;
 			await page.screenshot({ path: join(out, name), fullPage: true });
 			row[gfm ? 'gfm' : 'off'] = { ...m, name };
@@ -58,18 +82,20 @@ for (const file of pages) {
 await browser.close();
 server.close();
 
-const overflow = (m) => Math.max(0, m.scroll - m.layout);
+// sideways scroll, or content cut off at the edge, whichever is worse
+const overflow = (m) => Math.max(0, m.scroll - m.layout, m.clipped || 0);
 writeFileSync(join(out, 'index.html'), `<!doctype html><meta charset="utf-8"><title>GfM screenshots</title>
 <style>body{font:14px system-ui,sans-serif;margin:16px;background:#f6f1e1}section{margin:24px 0}.pair{display:flex;gap:16px;align-items:flex-start;overflow-x:auto}figure{margin:0}img{border:1px solid #b9a77a;max-width:420px}.bad{color:#a01818;font-weight:bold}</style>
 <h1>GfM screenshots</h1>
 ${rows.map((r) => `<section><h2>${r.file} · ${r.width} px · ${r.gfm.mode}</h2>
-<p class="${overflow(r.gfm) ? 'bad' : ''}">GfM: layout ${r.gfm.layout} px, page ${r.gfm.scroll} px${overflow(r.gfm) ? `, overflows by ${overflow(r.gfm)} px` : ''}</p>
+<p class="${overflow(r.gfm) ? 'bad' : ''}">GfM: layout ${r.gfm.layout} px, page ${r.gfm.scroll} px${overflow(r.gfm) ? `, sticks out by ${overflow(r.gfm)} px (worst: ${r.gfm.worst})` : ''}</p>
 <div class="pair"><figure><figcaption>GfM</figcaption><img src="${r.gfm.name}" loading="lazy"></figure>
 <figure><figcaption>without</figcaption><img src="${r.off.name}" loading="lazy"></figure></div></section>`).join('\n')}`);
 
-console.log('page                                         width mode  layout  overflow');
+console.log('page                                         width mode  layout  overflow  worst element');
 for (const r of rows) {
-	console.log(`${r.file.padEnd(44).slice(0, 44)} ${String(r.width).padStart(5)} ${r.gfm.mode.padEnd(5)} ${String(r.gfm.layout).padStart(6)}  ${overflow(r.gfm) ? overflow(r.gfm) + ' px' : 'ok'}`);
+	const o = overflow(r.gfm);
+	console.log(`${r.file.padEnd(44).slice(0, 44)} ${String(r.width).padStart(5)} ${r.gfm.mode.padEnd(5)} ${String(r.gfm.layout).padStart(6)}  ${(o ? o + ' px' : 'ok').padEnd(8)}  ${o ? r.gfm.worst : ''}`);
 }
 const bad = rows.filter((r) => overflow(r.gfm)).length;
-console.log(`\n${rows.length} views, ${bad} with sideways overflow. Gallery: npm run preview → /${SHOTS_DIR}/index.html`);
+console.log(`\n${rows.length} views, ${bad} scroll sideways or cut content off. Gallery: npm run preview → /${SHOTS_DIR}/index.html`);

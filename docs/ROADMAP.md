@@ -12,16 +12,22 @@ Every change can now be seen in seconds without logging in (`npm run preview`,
 `npm run shots`), and CI runs the add-on in real Firefox on each push. The
 work now is making the drafted shell actually fit.
 
-**Baseline (2026-10-24, `npm run shots -- 390`):** 37 of 37 saved pages
-scroll sideways. Fluid pages are 585 px wide in a 390 px viewport, and fit
-pages 585 px in 560 px. Re-run after each step and record the new count here.
+**Overflow report (`npm run shots`, 37 saved pages × 360 / 390 / 412 px = 111 views).**
+It counts a view as bad when the page scrolls sideways *or* content is cut
+off at the screen edge (`overflow-x: hidden` hides the second from
+`scrollWidth`, so both are measured). Re-run after each step and record it here.
+
+| Date | Bad views | Note |
+|---|---|---|
+| 2026-10-24 | 111 / 111 | first run: the shell alone was 585 px wide |
+| 2026-10-24 | 27 / 111 | shell fixed (step 1 below, done); 9 pages left, all page content |
 
 | # | Step | Effort | Done when |
 |---|---|---|---|
-| 1 | **Shell-wide overflow.** The elements that stick out on every page: `#mmonetbar #mmoContent` (the Gameforge bar, 585 px), `#banner_event` (absolute at x = 353), the `.cooldown_bar_fill` bars, GCA's header timer spans (`#header_game .container`), the `#mainnav` table | S | No page overflows because of the shell; only page content is left in the report |
-| 2 | **Header status bar.** The header children lose their icons and labels and keep stray absolute offsets. Rebuild it as the grid from [ANALYSIS §4.3](ANALYSIS.md#43-shell-reflow-both-modes), from the real markup in the fixtures | M | Gold, rubies, level, HP/XP, points and the 4 cooldowns readable at 360 px |
-| 3 | **☰ button vs. the Gameforge bar.** The fixed button covers the bar's links. Put the button in the status bar row, under `#mmonetbar` | S | Nothing under the button at 360 px |
-| 4 | **Page content overflow**, page by page from the report, fluid pages first (messages: fixed-width `.message_box`; `.paging_numbers`) | M | 0 overflowing pages at 360 / 390 / 412 |
+| 1 | ~~**Shell-wide overflow**~~ **done**: the Gameforge bar (`#mmoContent` 585 px), `#banner_event` and its link, the cooldown bar fills and links, the HP/XP percentages, the header link row. Header boxes are now `relative` with the desktop offsets reset, so their absolute children stay inside them. Covered by the browser tests | S | No view is bad because of the shell |
+| 2 | **Header status bar.** It fits now, but the values have no icons or labels, "Go to expedition" is cut to "Go to", and GCA's timers float loose. Rebuild it as the grid from [ANALYSIS §4.3](ANALYSIS.md#43-shell-reflow-both-modes), from the real markup in the fixtures | M | Gold, rubies, level, HP/XP, points and the 4 cooldowns readable at 360 px |
+| 3 | **Top of the page.** The ☰ button covers the Gameforge bar's logo, and the bar (absolute, 32 px) overlaps the header's link row. Reserve the bar's height, then put the button in the status bar row | S | Nothing overlaps at 360 px |
+| 4 | **Page content**, from the report: messages (`.message_box`), missions and pantheon (`.contentboard_header_*`), gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), the loot modal (`#blackoutDialog`), merchant inventory tabs (`#inventory_nav`, fit) | M | 0 bad views |
 | 5 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
 | 6 | First device session on Firefox for Android (`npm run android`): viewport tag honoured in fit and fluid mode, drawer, scrolling | S | Phase 1 device check ticked |
 
