@@ -98,6 +98,12 @@ Consequences:
    second touch→mouse layer. It would double-fire mousedown and break drags.
 2. **Tap shows a tooltip** in principle. Our job is to make the tooltip fit the
    screen, not to rebuild it.
+   The handler decides by walking up from the tapped element: unless it
+   reaches a link, form field or label (or an element with an `onclick`
+   attribute or a jQuery click handler), the tap is a tooltip tap and
+   `preventDefault()` on `touchend` **cancels the click**. GfM's own controls
+   are therefore links; a `<button>` with a native listener never gets a click
+   on a phone (found on the first device sessions).
 3. **What does not work by finger:**
    - `mouseenter` on the bag tabs while dragging. The game opens another bag
      when you hover its tab with an item. Synthetic `mousemove` events do not

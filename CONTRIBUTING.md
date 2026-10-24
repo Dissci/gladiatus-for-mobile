@@ -63,6 +63,11 @@ images.** They contain your session token and Gameforge's copyrighted assets.
   show on desktop.
 - Never use `transform: scale` or `zoom`. They break the game's drag-and-drop
   and its image maps. `translate` is fine.
+- GfM's own controls are links (`<a href="#" role="button">`), never
+  `<button>` or a clickable `<div>`. The game's touch handler cancels the
+  click on a tap on anything that is not a link, form field or label.
+- Check header and menu changes with `?gca=1` in the preview: the saved pages
+  do not include GCA's stylesheet.
 - Prefer the game's stable IDs over class chains. Touch targets are at least
   `var(--gfm-touch)` (44 px).
 - Tabs for indentation, one selector per line.

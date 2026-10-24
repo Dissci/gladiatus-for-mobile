@@ -73,9 +73,18 @@ test('header: no overlaps, vanilla and with GCA', async () => {
 	}
 });
 
-test('menu drawer opens by tap', async () => {
-	await open('location');
-	await page.tap('#gfm-menu-button');
-	await page.waitForFunction(() => document.getElementById('sidebar').getBoundingClientRect().left >= 0);
-	assert.ok((await page.evaluate(measure)).menuOpen);
+// taps go through the stand-in for the game's touch handler, which cancels
+// clicks on anything that is not a link
+test('menu drawer opens and closes by tap, vanilla and with GCA', async () => {
+	for (const gca of [false, true]) {
+		await open('location', { gca });
+		await page.tap('#gfm-menu-button');
+		await page.waitForFunction(() => document.getElementById('sidebar').getBoundingClientRect().left >= 0, { timeout: 3000 });
+		assert.ok((await page.evaluate(measure)).menuOpen, `gca=${gca}: open`);
+		assert.equal(new URL(page.url()).hash, '', 'no "#" added to the URL');
+
+		await page.touchscreen.tap(370, 400); // the backdrop, right of the drawer
+		await page.waitForFunction(() => document.getElementById('sidebar').getBoundingClientRect().right <= 0, { timeout: 3000 });
+		assert.equal((await page.evaluate(measure)).menuOpen, false, `gca=${gca}: closed`);
+	}
 });

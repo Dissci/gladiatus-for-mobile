@@ -20,7 +20,7 @@ test('GfM goes first in <head>, the page scripts are removed', async () => {
 	const { injectGfm } = await preview();
 	const out = injectGfm(saved);
 	assert.ok(out.indexOf('id="gfm-style"') < out.indexOf('<meta charset'), 'GfM CSS comes before the page styles');
-	assert.doesNotMatch(out, /game\.js|window\.x = 1|later\(\)/);
+	assert.doesNotMatch(out, /src="game\.js"|window\.x = 1|later\(\)/);
 	assert.match(out, /gfm-menu-button/, 'layout.js is included');
 	assert.match(out, /mod=guildMarket/, 'detection points at the page\'s mod');
 });
@@ -60,4 +60,11 @@ test('inlined source cannot close the injected elements early', async () => {
 	const out = injectGfm('<head></head>', { bundle: { css: 'a::after{content:"</style>"}', js: '// content/boot.js\nconst s = "</script>";' } });
 	assert.equal(out.match(/<\/style>/g).length, 1);
 	assert.equal(out.match(/<\/script>/g).length, 1);
+});
+
+test('GCA stylesheet goes to the top of <head> and cannot close its element early', async () => {
+	const { withGca } = await preview();
+	const out = withGca('<html><head><link rel="stylesheet" href="game.css"></head></html>', '#x { content: "</style>"; }');
+	assert.ok(out.indexOf('id="gca-style"') < out.indexOf('game.css'));
+	assert.equal(out.match(/<\/style>/g).length, 1);
 });

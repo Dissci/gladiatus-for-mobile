@@ -11,13 +11,22 @@ on a real page, `[ ]` not started.
 Every change can now be seen in seconds without logging in (`npm run preview`,
 `npm run shots`), and CI runs the add-on in real Firefox on each push.
 
-**First phone session (2026-10-24, Android 16, Firefox with GCA):** the menu
-drawer could not be opened, the top of the page was a pile-up, and in the
-pantheon the accept / decline buttons were off screen and unreachable. All
-three are fixed (see Done) and covered by browser tests; **re-test on the
-phone is next.** Lesson: saved pages contain GCA's HTML but not GCA's
-stylesheet, so GCA layout conflicts only show on a real device. The test page
-now carries the GCA rules GfM has to undo.
+**Phone sessions (2026-10-24, Android 16, Firefox with GCA).**
+Session 1: the drawer could not be opened, the top of the page was a pile-up,
+and the pantheon accept / decline buttons were off screen. Session 2: the
+pantheon was fixed, but the drawer still did not open and the top bar was
+still broken. Causes found and fixed (see Done):
+
+- Saved pages contain GCA's HTML but not GCA's stylesheet, and the preview
+  strips the game's scripts, so neither showed in the preview. The preview
+  now has `?gca=1` (GCA's real stylesheet) and `?scripts=1`; the browser-test
+  page carries the GCA rules GfM undoes and a stand-in for the game's touch
+  handler.
+- **The game's touch handler cancels the click on anything that is not a
+  link, form field or label** (it takes the tap as "show tooltip"). GfM's own
+  controls must therefore be `<a role="button">`, never `<button>` or `<div>`.
+
+**Re-test on the phone is next.**
 
 **Overflow report (`npm run shots`, 37 saved pages × 360 / 390 / 412 px = 111 views).**
 It counts a view as bad when the page scrolls sideways, content is cut off at
@@ -28,15 +37,16 @@ the screen edge, or content needs the last-resort sideways scroll inside
 |---|---|---|
 | 2026-10-24 | 111 / 111 | first run: the shell alone was 585 px wide |
 | 2026-10-24 | 27 / 111 | shell fixed; 9 pages left, all page content |
-| 2026-10-24 | 18 / 111 | pantheon quests, missions, messages fixed after the phone session |
+| 2026-10-24 | 18 / 111 | pantheon quests, missions, messages fixed after phone session 1 |
+| 2026-10-24 | 18 / 111 | header rebuilt as a grid, Gameforge bar in the flow (phone session 2); same pages left |
 
 | # | Step | Effort | Done when |
 |---|---|---|---|
-| 1 | **Re-test on the phone** (`npm run android`): drawer, top of the page while scrolling (GCA bar), pantheon accept / decline, messages Move / Delete / Report, missions progress. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
-| 2 | **Header status bar.** It fits and nothing overlaps, but it is still the desktop pieces in a row: values without labels, "Go to expedition" cut to "Go to", GCA's timers loose. Rebuild it as the grid from [ANALYSIS §4.3](ANALYSIS.md#43-shell-reflow-both-modes), from the real markup in the fixtures | M | Gold, rubies, level, HP/XP, points and the 4 cooldowns readable at 360 px |
+| 1 | **Re-test on the phone** (`npm run android`): ☰ opens and the backdrop closes the drawer; the header from the top and while scrolling; messages Move / Delete / Report; missions. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
+| 2 | **Header polish** after the phone check: the grid is in place (links · icons, gold, level · HP · XP · points · ranks · cooldowns 2×2 · tabs), but icons and bars could only be checked without the game's images. Fine-tune spacing and sizes on the device | S | Header readable at 360 px on the phone |
 | 3 | **Page content**, from the report: gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), the loot modal (`#blackoutDialog`), merchant inventory tabs (`#inventory_nav`, fit) | M | 0 bad views |
 | 4 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
-| 5 | Optional: `npm run preview -- --gca` that adds GCA's stylesheet (fetched from its GitHub release at a pinned version, never committed), so GCA conflicts show in the screenshots too | S | Report run with and without GCA |
+| 5 | `npm run shots -- --gca`: the screenshot report with GCA's stylesheet (the preview already has `?gca=1`) | S | Report run with and without GCA |
 
 ### Done
 
@@ -47,6 +57,7 @@ the screen edge, or content needs the last-resort sideways scroll inside
 - [x] CI is green on GitHub and now also runs the browser tests (`npm run test:e2e`): the add-on installed in headless Firefox, and the userscript in Chrome phone emulation, both on a test page written for this repo
 - [x] **Bug found and fixed:** the ☰ button showed as a plain button at the bottom of every page on desktop
 - [x] Phone session 1 fixes: **the ☰ button was covered** by the Gameforge bar (and by GCA's fixed bar when scrolled), so the drawer could not open. It is now a floating button at the bottom left, above everything, and the closed drawer is hidden instead of peeking out at the left edge. **GCA's "top fixed bar"** pinned header values at desktop positions when scrolling; on phones they stay in the header and the bar is hidden. **GCA's moved event bar** pushed the banner 155 px into the header; undone. **Pantheon quests, missions and messages** reflow to the screen width, so the accept / decline buttons and Move / Delete / Report are on screen. Anything still too wide now scrolls inside the content instead of being cut off
+- [x] Phone session 2 fixes: **the drawer button and backdrop are links now** (`<a role="button">`). As a `<button>`/`<div>` their clicks were cancelled by the game's touch handler; checked against the real handler on the saved pages (`?scripts=1`) and by a stand-in in the Chrome tests. **Header rebuilt as a 6-column grid** (see step 2), GCA's "extend" HP/XP offsets undone, and **the Gameforge bar is in the flow at the top** instead of absolute over the header (its markup is at the end of `<body>`, so `<body>` is a flex column with the bar ordered first). Preview: `?gca=1` adds GCA's real stylesheet (v4.3.12, downloaded once into `fixtures/_gca/`)
 - [x] Shell-wide overflow: the Gameforge bar (`#mmoContent` 585 px), `#banner_event` and its link, the cooldown bar fills and links, the HP/XP percentages, the header link row. Header boxes are `relative` with the desktop offsets reset, so their absolute children stay inside them
 - [x] `npm run android` fixed: it targeted Firefox Nightly (`org.mozilla.fenix`) instead of the Play Store Firefox, and web-ext needs the device ID. `scripts/android.mjs` now picks the phone and the installed Firefox, and explains the usual setup errors
 

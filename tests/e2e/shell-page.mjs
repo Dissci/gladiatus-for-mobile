@@ -55,6 +55,20 @@ const GCA_CSS = `
 .glfix.event_bar_moved #banner_event { top: 152px !important; }
 `;
 
+// What the game's touch handler (game.js, docs/ANALYSIS.md §1.4) does to a
+// tap, rewritten from its behaviour: unless the tap lands on a link, form
+// field or label (or an element with an onclick attribute), it is taken as
+// "show the tooltip" and the click is cancelled. A <button> or <div> of ours
+// never gets a click on a phone.
+const GAME_TOUCH_JS = `
+document.addEventListener('touchend', function (event) {
+	for (let el = event.target; el && el !== document.body; el = el.parentElement) {
+		if (el.matches('a, input, textarea, select, label') || el.hasAttribute('onclick')) return;
+	}
+	event.preventDefault();
+}, { passive: false });
+`;
+
 const CONTENT = {
 	locationPage: `
 		<div id="expedition_list">
@@ -73,7 +87,7 @@ const CONTENT = {
 export function shellPage(bodyId, options = {}) {
 	const gca = options.gca;
 	return `<!doctype html>
-<html${gca ? ' class="glfix event_bar_moved"' : ''}>${options.beforeHead || ''}<head><meta charset="utf-8"><title>GfM test shell</title><style>${GAME_CSS}${gca ? GCA_CSS : ''}</style></head>
+<html${gca ? ' class="glfix event_bar_moved"' : ''}>${options.beforeHead || ''}<head><meta charset="utf-8"><title>GfM test shell</title><style>${GAME_CSS}${gca ? GCA_CSS : ''}</style><script>${GAME_TOUCH_JS}</script></head>
 <body id="${bodyId}">
 <div id="mmonetbar"><div id="mmoContent"><a id="mmoLogo" href="#">Gameforge</a><div id="mmoGame">More games</div></div></div>
 <div id="wrapper_game"><div id="container_game">

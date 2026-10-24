@@ -14,10 +14,15 @@
 //   ?gfm=0        the page without GfM (before/after comparison)
 //   ?scripts=1    keep the page's own scripts
 //   ?mod=x&submod=y  override the page detection (default: from body#id)
+//   ?gca=1        add Gladiatus Crazy Addon's stylesheet. Saved pages contain
+//                 GCA's HTML but not its CSS (GCA injects it at runtime), so
+//                 without this GCA layout conflicts only show on a device.
+//                 Downloaded once from GCA's GitHub at GCA_VERSION into
+//                 fixtures/_gca/ (git-ignored; GCA is GPL-3.0).
 //
 // Local only: fixtures contain Gameforge assets and are never published.
 import { createServer } from 'node:http';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, extname, join, normalize, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readBundle } from './build.mjs';
@@ -26,6 +31,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const FIXTURES = join(root, 'fixtures');
 export const SHOTS_DIR = '_shots';
 export const PREVIEW_HOST = 'https://s1-en.gladiatus.gameforge.com';
+// the GCA version the saved pages were made with (docs/ANALYSIS.md, sources)
+export const GCA_VERSION = 'v4.3.12';
 
 const TYPES = {
 	'.html': 'text/html; charset=utf-8',
@@ -87,6 +94,28 @@ export function injectGfm(html, options = {}) {
 		: inject + '\n' + out;
 }
 
+/** GCA's stylesheet at GCA_VERSION, downloaded on first use. */
+export async function gcaStylesheet(dir = FIXTURES) {
+	const file = join(dir, '_gca', `style_gca-${GCA_VERSION}.css`);
+	if (!existsSync(file)) {
+		const url = `https://raw.githubusercontent.com/DinoDevs/GladiatusCrazyAddon/${GCA_VERSION}/source/core/resources/style_gca.css`;
+		const res = await fetch(url);
+		if (!res.ok) throw new Error(`could not download GCA's stylesheet (${res.status}): ${url}`);
+		mkdirSync(dirname(file), { recursive: true });
+		writeFileSync(file, await res.text());
+	}
+	return readFileSync(file, 'utf8');
+}
+
+/** Add GCA's stylesheet at the top of <head>, where an add-on's CSS goes. */
+export function withGca(html, gcaCss) {
+	const style = `<style id="gca-style">${gcaCss.replace(/<\/style/gi, '<\\/style')}</style>`;
+	const head = /<head(\s[^>]*)?>/i.exec(html);
+	return head
+		? html.slice(0, head.index + head[0].length) + '\n' + style + html.slice(head.index + head[0].length)
+		: style + html;
+}
+
 /** Saved pages under fixtures/, as paths relative to it with forward slashes. */
 export function listFixtures(dir = FIXTURES) {
 	if (!existsSync(dir)) return [];
@@ -101,7 +130,7 @@ export function listFixtures(dir = FIXTURES) {
 }
 
 function indexPage(files) {
-	const rows = files.map((f) => `<li><a href="/${encodeURI(f)}">${f}</a> <a class="off" href="/${encodeURI(f)}?gfm=0">without GfM</a></li>`);
+	const rows = files.map((f) => `<li><a href="/${encodeURI(f)}">${f}</a> <a class="off" href="/${encodeURI(f)}?gca=1">with GCA</a> <a class="off" href="/${encodeURI(f)}?gfm=0">without GfM</a></li>`);
 	const shots = existsSync(join(FIXTURES, SHOTS_DIR, 'index.html'))
 		? `<p><a href="/${SHOTS_DIR}/index.html">Screenshots</a></p>` : '';
 	return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -121,7 +150,7 @@ export function startServer({ port = 8560, host = '127.0.0.1', dir = FIXTURES } 
 			return;
 		}
 		const file = normalize(join(dir, decodeURIComponent(url.pathname)));
-		if (!file.startsWith(dir + sep) || !existsSync(file) || !statSync(file).isFile()) {
+		if (!file.startsWith(dir + sep) || !existsSync(file) || !statSync(file).isFile() || relative(dir, file).startsWith('_gca')) {
 			res.writeHead(404, { 'content-type': 'text/plain' });
 			res.end('not found');
 			return;
@@ -129,17 +158,24 @@ export function startServer({ port = 8560, host = '127.0.0.1', dir = FIXTURES } 
 		const type = TYPES[extname(file).toLowerCase()] || 'application/octet-stream';
 		res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store' });
 		const isPage = /\.html?$/i.test(file) && !relative(dir, file).startsWith(SHOTS_DIR);
-		if (isPage && url.searchParams.get('gfm') !== '0') {
-			res.end(injectGfm(readFileSync(file, 'utf8'), {
+		if (!isPage) {
+			res.end(readFileSync(file));
+			return;
+		}
+		const scripts = url.searchParams.get('scripts') === '1';
+		let html = readFileSync(file, 'utf8');
+		html = url.searchParams.get('gfm') === '0'
+			? (scripts ? html : stripScripts(html))
+			: injectGfm(html, {
 				mod: url.searchParams.get('mod') || undefined,
 				submod: url.searchParams.get('submod') || undefined,
-				scripts: url.searchParams.get('scripts') === '1',
-			}));
-		} else if (isPage) {
-			res.end(url.searchParams.get('scripts') === '1' ? readFileSync(file) : stripScripts(readFileSync(file, 'utf8')));
-		} else {
-			res.end(readFileSync(file));
+				scripts,
+			});
+		if (url.searchParams.get('gca') !== '1') {
+			res.end(html);
+			return;
 		}
+		gcaStylesheet(dir).then((css) => res.end(withGca(html, css)), (e) => res.end(`<p>${e.message}</p>` + html));
 	});
 	return new Promise((resolve) => server.listen(port, host, () => resolve(server)));
 }

@@ -46,7 +46,16 @@
 		top: 0;
 	}
 
-	/* --- header → compact status bar --- */
+	/* --- header → status bar ---
+	   A 6-column grid (docs/ANALYSIS.md §4.3):
+	     links row (Help … Logout, server time)                  full width
+	     news/messages/packages/reports icons | gold, highscore | level
+	     HP | XP
+	     expedition + dungeon points | arena + circus ranks
+	     cooldown bars, 2 × 2
+	     sub-tabs, then anything else (GCA extras)             full width
+	   Dense flow fills the gap in row 2 with the level box, which comes
+	   later in the markup. */
 	html.gfm #header_game {
 		width: auto;
 		height: auto;
@@ -54,16 +63,16 @@
 		padding: var(--gfm-gap);
 		background: var(--gfm-bar-bg);
 		color: var(--gfm-bar-fg);
-		display: flex;
-		flex-wrap: wrap;
-		gap: 4px var(--gfm-gap);
+		display: grid;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		grid-auto-flow: row dense;
+		gap: 6px var(--gfm-gap);
 		align-items: center;
 		text-align: left;
 	}
 	/* in the flow, but still the containing block of their absolute children
 	   (bar fills, percentages), which would otherwise span the whole page */
-	html.gfm #header_game > div,
-	html.gfm #header_game > ul {
+	html.gfm #header_game > * {
 		position: relative !important;
 		left: auto !important;
 		top: auto !important;
@@ -71,28 +80,80 @@
 		bottom: auto !important;
 		float: none;
 		margin: 0;
+		grid-column: 1 / -1;
+		min-width: 0;
 		max-width: 100%;
 	}
-	/* top links row (Help, Profile, … Logout, server time) */
 	html.gfm #header_game > .container {
-		flex: 1 1 100%;
+		display: flex;
 		flex-wrap: wrap;
 		gap: 0 var(--gfm-gap);
+		font-size: 12px;
+	}
+	html.gfm #header_game > #header_menue {
+		grid-column: span 3;
+	}
+	html.gfm #header_game > #header_values_ressources {
+		grid-column: span 2;
+	}
+	html.gfm #header_game > #header_values_general {
+		grid-column: span 1;
+	}
+	html.gfm #header_game > #header_values_hp,
+	html.gfm #header_game > #header_values_xp,
+	html.gfm #header_game > #header_values_pve,
+	html.gfm #header_game > #header_values_pvp,
+	html.gfm #header_game > .cooldown_bar {
+		grid-column: span 3;
+	}
+	html.gfm #header_game > .header_box,
+	html.gfm #header_game > .header_box_big {
+		width: auto;
+		height: auto;
+	}
+
+	/* HP / XP: the bar (fill width is a percentage) stretches, the percentage
+	   sits at its right end, the points go below. GCA's "extend" layout pulls
+	   the points up and left with negative margins. */
+	html.gfm #header_values_hp,
+	html.gfm #header_values_xp {
+		width: auto;
+		height: auto;
+		text-align: left;
+	}
+	html.gfm #header_values_hp_bar,
+	html.gfm #header_values_xp_bar {
+		position: relative;
+		left: auto;
+		top: auto;
+		width: calc(100% - 34px);
+		margin: 4px 0;
 	}
 	html.gfm #header_values_hp_percent,
 	html.gfm #header_values_xp_percent {
 		left: auto;
-		right: 4px;
+		right: 0;
+		top: 0;
+		width: 30px;
 	}
-	html.gfm #header_values_hp,
-	html.gfm #header_values_xp {
-		flex: 1 1 40%;
+	html.gfm #header_values_hp_points,
+	html.gfm #header_values_xp_points {
+		display: inline-block;
+		width: auto;
+		margin: 0;
+		text-align: left;
 	}
+	html.gfm #header_life_pot {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	/* cooldown bars: the bar image, fill and link are sized for 138 px */
 	html.gfm #header_game .cooldown_bar {
-		flex: 1 1 calc(25% - var(--gfm-gap));
-		min-width: 70px;
+		width: auto;
+		background-size: 100% 100%;
 	}
-	/* the link covers the bar; the game sizes it for the 138 px desktop bar */
+	html.gfm #header_game .cooldown_bar_text,
 	html.gfm #header_game .cooldown_bar_link {
 		width: 100%;
 	}
@@ -101,7 +162,22 @@
 		display: none;
 	}
 
-	/* --- Gameforge network bar: kept, but no wider than the screen --- */
+	/* --- Gameforge network bar: kept, but no wider than the screen ---
+	   In the flow: on desktop it is absolute over a 35 px gap the game
+	   leaves above #container_game, which GfM removes; wrapped onto two
+	   lines it would cover the header. Its markup is at the end of <body>,
+	   so <body> becomes a column and the bar is ordered first. */
+	html.gfm body {
+		display: flex;
+		flex-direction: column;
+	}
+	html.gfm #mmonetbar {
+		position: relative !important;
+		order: -1;
+		height: auto;
+		/* its texture is 32 px tall; the colour covers a second line */
+		background-color: #1c1209;
+	}
 	html.gfm #mmoContent {
 		width: auto;
 		max-width: 100%;
@@ -184,7 +260,11 @@
 
 	/* floating, bottom left: in thumb reach, and clear of the bars at the top */
 	#gfm-menu-button {
-		display: block;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		text-decoration: none;
 		position: fixed;
 		left: calc(var(--gfm-gap) * 1.5);
 		bottom: calc(var(--gfm-gap) * 1.5 + env(safe-area-inset-bottom, 0px));

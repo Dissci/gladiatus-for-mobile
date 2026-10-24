@@ -109,8 +109,11 @@ contain Gameforge assets and your session token. Run
 `npm run preview` serves them with the add-on injected, the way the content
 script runs. The page's own scripts are left out by default, because a saved
 page is already a snapshot of the DOM after the game and GCA ran. Add
-`?gfm=0` to a page URL to see it without GfM, or `?scripts=1` to keep its
-scripts. `npm run shots` writes `fixtures/_shots/`, which you can browse from
+`?gfm=0` to a page URL to see it without GfM, `?scripts=1` to keep its
+scripts (the game's touch handler, for example), or `?gca=1` to add Gladiatus
+Crazy Addon's stylesheet. Saved pages contain GCA's HTML but not its CSS, so
+use `?gca=1` for anything near the header or menu. It is downloaded once from
+GCA's GitHub into `fixtures/_gca/`. `npm run shots` writes `fixtures/_shots/`, which you can browse from
 the preview's start page.
 
 ## License
