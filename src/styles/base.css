@@ -14,6 +14,12 @@
 	--gfm-gap: 8px;
 }
 
+/* our own elements exist at every width, but are shown only on phones */
+#gfm-menu-button,
+#gfm-menu-backdrop {
+	display: none;
+}
+
 @media (max-width: 899px) {
 
 	/* --- wrappers: drop the 920/960 px minimums --- */
@@ -119,6 +125,7 @@
 	}
 
 	#gfm-menu-button {
+		display: block;
 		position: fixed;
 		top: var(--gfm-gap);
 		left: var(--gfm-gap);
@@ -130,9 +137,6 @@
 		background: var(--gfm-bar-bg);
 		color: var(--gfm-bar-fg);
 		font-size: 22px;
-	}
-	#gfm-menu-backdrop {
-		display: none;
 	}
 	html.gfm.gfm-menu-open #gfm-menu-backdrop {
 		display: block;

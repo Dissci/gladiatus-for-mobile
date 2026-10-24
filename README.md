@@ -27,8 +27,11 @@ checks this automatically
 ([`tests/compliance.test.js`](tests/compliance.test.js)). The reasoning is in
 [docs/ANALYSIS.md §2](docs/ANALYSIS.md#2-rules-legality-and-safety).
 
-> Status: **phase 0, pre-alpha.** Analysis and project template are done, and
-> the layout work starts in phase 1. See the [roadmap](docs/ROADMAP.md).
+> Status: **phase 1, pre-alpha.** The shell layout is drafted and runs in
+> Firefox and as a userscript, but it is not yet usable on a phone. See the
+> [roadmap](docs/ROADMAP.md).
+
+[![CI](https://github.com/Dissci/gladiatus-for-mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/Dissci/gladiatus-for-mobile/actions/workflows/ci.yml)
 
 ## Install (testers)
 
@@ -49,15 +52,26 @@ checks this automatically
 
 ## Development
 
-Requires Node 20+.
+Requires Node 20+. The add-on itself has no dependencies; `npm install` only
+fetches the dev tools (Puppeteer for the browser tests).
 
 ```sh
-npm test          # unit + compliance + repo hygiene tests
+npm test          # unit + compliance + repo hygiene tests (no browser needed)
+npm run test:e2e  # the add-on in real Firefox + the userscript in Chrome phone emulation
 npm run build     # dist/extension/ and dist/gladiatus-for-mobile.user.js
 npm run lint      # web-ext lint
-npm start         # desktop Firefox; use responsive design mode (Ctrl+Shift+M)
+npm run preview   # saved pages from fixtures/ with GfM applied, http://127.0.0.1:8560/
+npm run shots     # screenshots of every saved page at 360/390/412 px + overflow report
+npm start         # desktop Firefox on the live game; responsive design mode (Ctrl+Shift+M)
 npm run android   # Firefox on a USB-connected Android phone (adb)
 ```
+
+Before the first `test:e2e` or `shots`, download the test browsers once:
+`npx puppeteer browsers install chrome` and `npx puppeteer browsers install firefox`.
+
+CI runs `npm test`, the build, `web-ext lint` and `npm run test:e2e` on every
+push. The browser tests use a test page written for this repository
+([`tests/e2e/shell-page.mjs`](tests/e2e/shell-page.mjs)), never real game pages.
 
 ```
 src/
@@ -66,14 +80,23 @@ src/
   content/boot.js      document_start: <html> classes + viewport meta
   content/layout.js    menu drawer button, table scroll wrappers
   styles/              base shell, fluid pages, GCA compatibility, per-page CSS
-scripts/               build, fixture sanitizer, page scanner
-tests/                 node:test
+scripts/               build, preview server, screenshots, fixture sanitizer, page scanner
+tests/                 node:test; tests/e2e/ runs real browsers
 docs/                  analysis, roadmap, page inventory
 ```
+
+### Working with saved pages
 
 Saved game pages for testing go into `fixtures/`, which is git-ignored. They
 contain Gameforge assets and your session token. Run
 `node scripts/sanitize-fixture.mjs <file>` on each one.
+
+`npm run preview` serves them with the add-on injected, the way the content
+script runs. The page's own scripts are left out by default, because a saved
+page is already a snapshot of the DOM after the game and GCA ran. Add
+`?gfm=0` to a page URL to see it without GfM, or `?scripts=1` to keep its
+scripts. `npm run shots` writes `fixtures/_shots/`, which you can browse from
+the preview's start page.
 
 ## License
 

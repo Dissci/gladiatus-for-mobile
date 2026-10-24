@@ -5,7 +5,8 @@
 (function () {
 	'use strict';
 
-	const info = window.gfmPages && window.gfmPages.detect(location.href);
+	const pages = globalThis.gfmPages;
+	const info = pages && pages.detect(location.href);
 	if (!info) return;
 
 	const html = document.documentElement;
@@ -13,7 +14,7 @@
 
 	const meta = document.createElement('meta');
 	meta.name = 'viewport';
-	meta.content = window.gfmPages.viewportContent(info.mode);
+	meta.content = pages.viewportContent(info.mode);
 	// <head> may not be parsed yet at document_start
 	(document.head || html).prepend(meta);
 })();

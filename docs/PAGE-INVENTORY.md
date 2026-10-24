@@ -12,7 +12,7 @@ Mode: **fit** = `width=560`, native geometry, browser-scaled.
 | Page (`body#id`, mod) | Saved fixture(s) | Mode | Main problem | Phase |
 |---|---|---|---|---|
 | `overviewPage` (overview) | main_page | fit | Doll + 8×5 inventory, bag tabs need hover during drag | 1 shell, 3 adapter |
-| `locationPage` (location) | expedition, special_event ×3 | fluid | 4 enemy cards in a 540 px row | 1 |
+| `locationPage` (location) | expedition, special_event ×2, cooldown (event on cooldown) | fluid | 4 enemy cards in a 540 px row | 1 |
 | `dungeonPage` (dungeon) | dungeon, enter_dungeon | fit | `<map>` area coords do not scale | 1 |
 | `reportsPage` (reports) | kill_expedition, kill_dungeon, arena_battle, treasury_reward, battler_reports | fluid | 9 nested tables per report | 2 |
 | `arenaPage` (arena, circus) | arena, arena_provinciarum, circus_turma, circus_provinciarum | fluid | Opponent tables | 2 |
@@ -53,4 +53,5 @@ Mode: **fit** = `width=560`, native geometry, browser-scaled.
 3. Add the `body#id` (and `mod`/`submod` when the id is shared) to
    [`src/lib/pages.js`](../src/lib/pages.js), choosing fit or fluid.
 4. Add `src/styles/pages/<page>.css` if the shell rules are not enough.
-5. Fill in a row above.
+5. Check it with `npm run preview` and `npm run shots -- <file>`.
+6. Fill in a row above.

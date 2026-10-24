@@ -9,11 +9,18 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = join(root, 'src');
 const dist = join(root, 'dist');
 
-export function buildUserscript() {
+// The content script's CSS and JS, concatenated in manifest order.
+// Also used by scripts/preview.mjs, so the preview runs exactly what ships.
+export function readBundle() {
 	const manifest = JSON.parse(readFileSync(join(src, 'manifest.json'), 'utf8'));
 	const [script] = manifest.content_scripts;
 	const css = script.css.map((f) => `/* ${f} */\n` + readFileSync(join(src, f), 'utf8')).join('\n');
 	const js = script.js.map((f) => `// ${f}\n` + readFileSync(join(src, f), 'utf8')).join('\n');
+	return { manifest, script, css, js };
+}
+
+export function buildUserscript() {
+	const { manifest, script, css, js } = readBundle();
 
 	const header = [
 		'// ==UserScript==',
@@ -32,8 +39,7 @@ export function buildUserscript() {
 	// CSS goes in first so there is no flash of the desktop layout
 	const injectCss = `(function () {\n\tconst style = document.createElement('style');\n\tstyle.id = 'gfm-style';\n\tstyle.textContent = ${JSON.stringify(css)};\n\t(document.head || document.documentElement).appendChild(style);\n})();`;
 
-	// pages.js attaches to `this`; in a userscript that must be window
-	return `${header}\n\n${injectCss}\n\n(function () {\n${js}\n}).call(window);\n`;
+	return `${header}\n\n${injectCss}\n\n(function () {\n${js}\n})();\n`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

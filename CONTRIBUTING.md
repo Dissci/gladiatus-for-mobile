@@ -43,8 +43,14 @@ pointer events. It must follow these rules:
 3. Check or add its `mod` in [`src/lib/pages.js`](src/lib/pages.js), choose
    `fit` or `fluid`, and add a test case.
 4. Put page-specific CSS in `src/styles/pages/<mod>.css` and list it in the manifest.
-5. Check it at 360, 390 and 412 px wide, with and without GCA.
-6. Update [docs/PAGE-INVENTORY.md](docs/PAGE-INVENTORY.md).
+5. Look at it with `npm run preview` in Firefox responsive design mode
+   (the server listens on 127.0.0.1 only). Then run `npm run shots -- <page>`
+   and check the gallery and the overflow report at 360, 390 and 412 px.
+   Check it with and without GCA.
+6. Run `npm test` and `npm run test:e2e`. If you changed the shell, extend
+   the test page in `tests/e2e/shell-page.mjs` so CI covers it.
+7. Update [docs/PAGE-INVENTORY.md](docs/PAGE-INVENTORY.md) and the
+   [roadmap](docs/ROADMAP.md).
 
 **Never commit saved pages, screenshots with the URL bar visible, or game
 images.** They contain your session token and Gameforge's copyrighted assets.
@@ -52,7 +58,9 @@ images.** They contain your session token and Gameforge's copyrighted assets.
 ## CSS conventions
 
 - Gate every rule with `html.gfm` (or `html.gfm-fit`, `html.gfm-fluid`,
-  `html.gfm-page-<mod>`) inside `@media (max-width: 899px)`.
+  `html.gfm-page-<mod>`) inside `@media (max-width: 899px)`. The one
+  exception is hiding GfM's own elements (`#gfm-*`) by default, so they never
+  show on desktop.
 - Never use `transform: scale` or `zoom`. They break the game's drag-and-drop
   and its image maps. `translate` is fine.
 - Prefer the game's stable IDs over class chains. Touch targets are at least

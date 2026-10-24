@@ -9,6 +9,9 @@
  *           For pages with drag-and-drop grids, the doll or image maps.
  *   fluid – viewport device-width, content reflowed to 100 %.
  * Unknown pages are "fit": it cannot break a page, only make it small.
+ *
+ * Exported on globalThis, not window: in a Firefox content script the global
+ * is a sandbox and window is a separate (Xray) object.
  */
 (function (root) {
 	'use strict';
@@ -86,4 +89,4 @@
 	} else {
 		root.gfmPages = api;
 	}
-})(this);
+})(globalThis);

@@ -171,8 +171,8 @@ would make GfM harder to defend and would duplicate GCA.
   `import`, or `location` assignment. The only exception is
   `src/content/input-adapter.js`, which is reviewed under stricter rules (4.5).
 - Manifest permissions: **none.** Only `content_scripts` on
-  `https://*.gladiatus.gameforge.com/game/index.php*`, plus `storage` for
-  layout preferences.
+  `https://*.gladiatus.gameforge.com/game/index.php*`. The phase 4 options
+  page will add `storage` for layout preferences, and nothing else.
 - No telemetry, no external hosts, no bundled third-party code.
 
 ### 2.4 Intellectual property
@@ -336,7 +336,7 @@ time. Support changes often and is not hard-coded in the docs.
 
 ```
 src/
-  manifest.json            MV3, no permissions besides storage
+  manifest.json            MV3, no permissions (storage from phase 4)
   content/boot.js          document_start: detect page, html classes, viewport meta
   content/layout.js        DOMContentLoaded: drawer button, table wrappers
   content/input-adapter.js (phase 3) the only file allowed to dispatch events
@@ -347,7 +347,10 @@ src/
   styles/compat-gca.css    GCA layer
 scripts/build.mjs          → dist/extension/, dist/gladiatus-for-mobile.user.js
 scripts/sanitize-fixture.mjs  strips sh=, csrf, secureHash from saved pages (local only)
-tests/                     node:test – pages map, compliance scan, userscript header
+scripts/preview.mjs        local server: saved pages with GfM injected (local only)
+scripts/screenshots.mjs    saved pages × phone widths → screenshots + overflow report (local only)
+tests/                     node:test – pages map, compliance scan, userscript header, preview
+tests/e2e/                 real browsers on a test shell page: Firefox add-on, Chrome userscript
 fixtures/                  (git-ignored) sanitized saved pages for visual checks
 docs/                      this analysis, roadmap, page inventory, rules
 ```
@@ -359,7 +362,8 @@ docs/                      this analysis, roadmap, page inventory, rules
 | Unit: page detection, mode map, build output | `node --test` | yes |
 | Compliance scan | `node --test` (`tests/compliance.test.js`) | yes, blocking |
 | Lint the extension | `web-ext lint` | yes |
-| Visual: fixtures × {360, 390, 412, 768} × {vanilla, GCA} | Playwright mobile emulation on a local static server | local only (fixtures are private) |
+| Browser: the add-on in Firefox (temporary add-on, game host answered with a test shell page) and the userscript in Chrome phone emulation. Classes, viewport tag and its effect, no sideways scroll, drawer, desktop untouched | Puppeteer + `node --test` (`tests/e2e/`) | yes |
+| Visual: saved pages × {360, 390, 412} × {with, without GfM}, with a sideways-overflow report | Puppeteer, Chrome phone emulation, on `scripts/preview.mjs` (`npm run shots`) | local only (fixtures are private) |
 | Real device | Firefox Android over `web-ext run --target=firefox-android` | manual checklist per release |
 
 Acceptance criteria per page:

@@ -19,3 +19,26 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run lint
+
+  # The add-on in real Firefox and the userscript in Chrome phone emulation,
+  # against a test shell page (tests/e2e/). No game pages, no network.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+      - run: npx puppeteer browsers install chrome
+      - run: npx puppeteer browsers install firefox
+      # Ubuntu 24.04 blocks the user namespaces Chrome's sandbox needs
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - run: npm run test:e2e

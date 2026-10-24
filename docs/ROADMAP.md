@@ -3,59 +3,95 @@
 Phases are ordered by value per effort. Each phase ends in a usable release.
 Effort: S ≤ 1 day, M ≤ 1 week, L > 1 week (one part-time contributor).
 
-## Phase 0: foundations (this commit)
+Status marks: `[x]` done and verified, `[~]` code drafted but not yet checked
+on a real page, `[ ]` not started.
+
+## Next steps (in this order)
+
+Every change can now be seen in seconds without logging in (`npm run preview`,
+`npm run shots`), and CI runs the add-on in real Firefox on each push. The
+work now is making the drafted shell actually fit.
+
+**Baseline (2026-10-24, `npm run shots -- 390`):** 37 of 37 saved pages
+scroll sideways. Fluid pages are 585 px wide in a 390 px viewport, and fit
+pages 585 px in 560 px. Re-run after each step and record the new count here.
+
+| # | Step | Effort | Done when |
+|---|---|---|---|
+| 1 | **Shell-wide overflow.** The elements that stick out on every page: `#mmonetbar #mmoContent` (the Gameforge bar, 585 px), `#banner_event` (absolute at x = 353), the `.cooldown_bar_fill` bars, GCA's header timer spans (`#header_game .container`), the `#mainnav` table | S | No page overflows because of the shell; only page content is left in the report |
+| 2 | **Header status bar.** The header children lose their icons and labels and keep stray absolute offsets. Rebuild it as the grid from [ANALYSIS §4.3](ANALYSIS.md#43-shell-reflow-both-modes), from the real markup in the fixtures | M | Gold, rubies, level, HP/XP, points and the 4 cooldowns readable at 360 px |
+| 3 | **☰ button vs. the Gameforge bar.** The fixed button covers the bar's links. Put the button in the status bar row, under `#mmonetbar` | S | Nothing under the button at 360 px |
+| 4 | **Page content overflow**, page by page from the report, fluid pages first (messages: fixed-width `.message_box`; `.paging_numbers`) | M | 0 overflowing pages at 360 / 390 / 412 |
+| 5 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
+| 6 | First device session on Firefox for Android (`npm run android`): viewport tag honoured in fit and fluid mode, drawer, scrolling | S | Phase 1 device check ticked |
+
+### Done
+
+- [x] Fixture preview harness `scripts/preview.mjs` (`npm run preview`): saved pages with GfM injected, `?gfm=0` for before/after
+- [x] Screenshot script `scripts/screenshots.mjs` (`npm run shots`): every saved page × 360 / 390 / 412 px × with/without GfM, a side-by-side gallery and a sideways-overflow report
+- [x] Boot path verified in real Firefox. **Bug found and fixed:** `pages.js` exported on `this` and `boot.js` read `window.gfmPages`. In a Firefox content script these are different objects, so the add-on did nothing at all. Both now use `globalThis`
+- [x] Viewport tag inserted before `<head>` exists takes effect (Chrome phone emulation, both modes). Firefox Android is still to check on a device (step 6)
+- [x] CI is green on GitHub and now also runs the browser tests (`npm run test:e2e`): the add-on installed in headless Firefox, and the userscript in Chrome phone emulation, both on a test page written for this repo
+- [x] **Bug found and fixed:** the ☰ button showed as a plain button at the bottom of every page on desktop
+
+## Phase 0: foundations
 
 - [x] Architecture analysis ([ANALYSIS.md](ANALYSIS.md)), page inventory, rules
 - [x] Repository template: MV3 extension + userscript build, zero runtime deps
 - [x] Compliance scan as a blocking test
 - [x] Page/mode map with unit tests
 - [x] Fixture sanitizer (strips `sh=`, csrf, `secureHash`)
-- [ ] CI on GitHub Actions (test + `web-ext lint`) — workflow file is in place; enable once the repo is pushed
-- [ ] Copy the 37 saved pages into `fixtures/` (local) and sanitize them
+- [x] Copy the 37 saved pages into `fixtures/` (local) and sanitize them
+- [x] CI on GitHub Actions (test + build + `web-ext lint` + browser tests)
+- [x] Fix doc drift: ANALYSIS §2.3/§4.8 said "`storage` permission", the manifest and tests say none. Now none until the phase 4 options page needs it
 
-## Phase 1: the shell (MVP), target v0.1 — M
+## Phase 1: the shell (MVP), target v0.1 (M)
 
 The goal is that every page fits the screen width and the whole game can be navigated.
 
-- [ ] Viewport injection per mode (fit / fluid) at `document_start`
-- [ ] Shell reflow: wrapper widths, status-bar header (gold, rubies, level, HP/XP, points, cooldowns)
-- [ ] `#mainnav` as a scroll strip, `#mainmenu` as an off-canvas drawer (☰)
-- [ ] Footer, banners and buff bar repositioned (ads kept, not hidden)
-- [ ] Location page: enemy cards 2×2, 44 px attack buttons
-- [ ] Dungeon: fit mode, map stays at native size and is centred
-- [ ] Overview: fit mode, doll and inventory stacked
+- [x] Preview harness + screenshot script
+- [x] Browser tests in CI: Firefox add-on + Chrome userscript (`tests/e2e/`)
+- [x] Viewport injection per mode (fit / fluid) at `document_start` (`boot.js`). Verified in Firefox (tag set) and Chrome emulation (tag applied)
+- [~] Shell reflow: wrapper widths, status-bar header (gold, rubies, level, HP/XP, points, cooldowns) (`base.css`). Overflows on every saved page (next steps 1-2)
+- [~] `#mainnav` as a scroll strip, `#mainmenu` as an off-canvas drawer (☰) (`base.css`, `layout.js`). The drawer opens and closes in both browsers; the button covers the Gameforge bar
+- [~] Footer, banners and buff bar repositioned (ads kept, not hidden). The buff bar has no rule yet
+- [~] Location page: enemy cards 2×2, 44 px attack buttons (`pages/location.css`). Looks right in the screenshots; device check pending
+- [~] Dungeon: fit mode, map stays at native size and is centred (`pages/dungeon.css`, centring missing)
+- [ ] Overview: fit mode, doll and inventory stacked (`pages/overview.css`)
+- [ ] Drawer closes on Escape and after choosing a menu link; focus moves into it (accessibility)
 - [ ] Device check on Firefox for Android at 360 / 390 / 412 px
 - [ ] Release: signed `.xpi` (AMO unlisted) for testers
 
-## Phase 2: readable pages, target v0.2 — M
+## Phase 2: readable pages, target v0.2 (M)
 
-- [ ] Fluid content rules: forms (16 px inputs), headings, boxes
-- [ ] Table scroll wrappers; per-page column priorities
+- [~] Fluid content rules: forms (16 px inputs), headings, boxes (`fluid.css`)
+- [~] Table scroll wrappers (`layout.js`); per-page column priorities not started
+- [ ] MutationObserver on `#content` for AJAX-replaced fragments (ANALYSIS §4.2 step 6), debounced, re-runs the table wrapping only
 - [ ] Reports: stacked battle rounds
 - [ ] Highscore, arena, circus lists
 - [ ] Pantheon quests, missions, gods: card layouts
 - [ ] Messages: folders into a select, full-width compose
 - [ ] Guild pages (bank, medic, building map)
-- [ ] Tooltips sized to the viewport
-- [ ] Save and cover the missing pages (training, forge, work, costumes, stats, settings)
+- [~] Tooltips sized to the viewport (one `max-width` rule; needs checking with the game's `.mobile` tooltip mode)
+- [ ] Save and cover the missing pages (training, forge, work, costumes, stats, settings), see [PAGE-INVENTORY](PAGE-INVENTORY.md#not-saved-yet-save-these-next)
 
-## Phase 3: inventory and touch, target v0.3 — L
+## Phase 3: inventory and touch, target v0.3 (L)
 
 - [ ] Fit-page layouts: merchants, packages, auction, guild market, smelter, Horreum
 - [ ] `input-adapter.js`: long-press → select → tap target (one gesture = one drag)
 - [ ] Bag switching while moving (tap a bag tab during selection)
 - [ ] Detect GCA's `item_move`; restyle it instead of running two adapters
-- [ ] Playwright visual suite on the local fixtures, vanilla × GCA
+- [ ] Turn the screenshot script into a visual diff suite (compare with the previous run), vanilla × GCA
 
-## Phase 4: reach, target v0.4 — M
+## Phase 4: reach, target v0.4 (M)
 
 - [ ] Userscript build tested on iOS Safari (*Userscripts* app) and Tampermonkey
-- [ ] GCA compatibility layer complete (shortcuts bar, fixed top bar, advanced menu, event bar)
-- [ ] Options page: fit width (540-600), per-page on/off, text size
+- [~] GCA compatibility layer complete (shortcuts bar, fixed top bar, advanced menu, event bar). First rules are in `compat-gca.css`; the event bar is missing
+- [ ] Options page: fit width (540-600), per-page on/off, text size (adds the `storage` permission; update the compliance test in its own PR)
 - [ ] RTL servers; underworld skin
 - [ ] Chat overlay fits the screen
 
-## Phase 5: community release, v1.0 — M
+## Phase 5: community release, v1.0 (M)
 
 - [ ] **Ask Gameforge community management in writing** whether the add-on is acceptable; publish the answer in the README
 - [ ] Contact the GCA team: shared class names, possible upstream "mobile layout" option
