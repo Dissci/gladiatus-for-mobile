@@ -12,7 +12,7 @@
     "shots": "node scripts/screenshots.mjs",
     "lint": "npx --yes web-ext lint --source-dir src",
     "start": "npx --yes web-ext run --source-dir src",
-    "android": "npx --yes web-ext run --source-dir src --target=firefox-android --firefox-apk org.mozilla.fenix"
+    "android": "node scripts/android.mjs"
   },
   "engines": {
     "node": ">=20"

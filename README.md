@@ -63,8 +63,23 @@ npm run lint      # web-ext lint
 npm run preview   # saved pages from fixtures/ with GfM applied, http://127.0.0.1:8560/
 npm run shots     # screenshots of every saved page at 360/390/412 px + overflow report
 npm start         # desktop Firefox on the live game; responsive design mode (Ctrl+Shift+M)
-npm run android   # Firefox on a USB-connected Android phone (adb)
+npm run android   # Firefox on a USB-connected Android phone (adb), see below
 ```
+
+### Testing on an Android phone
+
+1. Phone: turn on Developer options (tap *Build number* 7 times) and **USB
+   debugging**. Install Firefox from the Play Store and turn on Settings →
+   **Remote debugging via USB**.
+2. Connect it by USB and accept "Allow USB debugging?" (tick *Always allow*).
+   `adb devices` must show the phone as `device`, not `unauthorized`.
+3. `npm run android`. It finds the phone and the installed Firefox (release,
+   Beta or Nightly), then opens Firefox there with the add-on loaded from
+   `src/`. Edits reload it live. Log into the game on the phone.
+4. To inspect the phone's tab from the PC: desktop Firefox → `about:debugging`.
+
+The add-on stays installed only while `npm run android` runs. Tablets: GfM
+switches off at 900 px and wider, so test in portrait.
 
 Before the first `test:e2e` or `shots`, download the test browsers once:
 `npx puppeteer browsers install chrome` and `npx puppeteer browsers install firefox`.

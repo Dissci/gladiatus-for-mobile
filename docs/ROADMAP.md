@@ -29,7 +29,7 @@ off at the screen edge (`overflow-x: hidden` hides the second from
 | 3 | **Top of the page.** The ☰ button covers the Gameforge bar's logo, and the bar (absolute, 32 px) overlaps the header's link row. Reserve the bar's height, then put the button in the status bar row | S | Nothing overlaps at 360 px |
 | 4 | **Page content**, from the report: messages (`.message_box`), missions and pantheon (`.contentboard_header_*`), gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), the loot modal (`#blackoutDialog`), merchant inventory tabs (`#inventory_nav`, fit) | M | 0 bad views |
 | 5 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
-| 6 | First device session on Firefox for Android (`npm run android`): viewport tag honoured in fit and fluid mode, drawer, scrolling | S | Phase 1 device check ticked |
+| 6 | First device session on Firefox for Android (`npm run android`, setup in the [README](../README.md#testing-on-an-android-phone)): viewport tag honoured in fit and fluid mode, drawer, scrolling, drag-and-drop by finger. The tooling works with a real phone (Android 16, Play Store Firefox); the session itself is pending | S | Phase 1 device check ticked |
 
 ### Done
 
@@ -39,6 +39,7 @@ off at the screen edge (`overflow-x: hidden` hides the second from
 - [x] Viewport tag inserted before `<head>` exists takes effect (Chrome phone emulation, both modes). Firefox Android is still to check on a device (step 6)
 - [x] CI is green on GitHub and now also runs the browser tests (`npm run test:e2e`): the add-on installed in headless Firefox, and the userscript in Chrome phone emulation, both on a test page written for this repo
 - [x] **Bug found and fixed:** the ☰ button showed as a plain button at the bottom of every page on desktop
+- [x] `npm run android` fixed: it targeted Firefox Nightly (`org.mozilla.fenix`) instead of the Play Store Firefox, and web-ext needs the device ID. `scripts/android.mjs` now picks the phone and the installed Firefox, and explains the usual setup errors
 
 ## Phase 0: foundations
 
