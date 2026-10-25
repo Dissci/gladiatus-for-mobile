@@ -269,9 +269,9 @@ desktop with the add-on installed looks identical to vanilla.
 | Element | Desktop | GfM |
 |---|---|---|
 | `#wrapper_game`, `#container_game`, `#main`, `#main_inner` | 960/920 px fixed | `min-width:0; width:auto` |
-| `#header_game` (absolute children) | 920×224 art | CSS grid "status bar": row 1 gold, rubies, level; row 2 HP bar, XP bar; row 3 expedition/dungeon points, arena ranks; row 4 four cooldown bars as compact pills (still the game's own links) |
+| `#header_game` (absolute children) | 920×224 art | Top: CSS grid "status bar": links; message icons, gold, level; XP bar, arena ranks; GCA extras; sub-tabs. Bottom: a fixed **dock** (`position: fixed` on the game's own elements, no DOM moves, so the game and GCA keep updating them): ☰, HP bar, expedition/dungeon points; then the four cooldown bars as equal buttons (still the game's own links) |
 | `ul#mainnav` (module sub-tabs, a table inside!) | absolute, left 393 px | static, horizontal scroll strip with `scroll-snap`, 44 px tall |
-| `#sidebar` / `#mainmenu` | 270 px left column | **off-canvas drawer.** A "☰" button toggles `html.gfm-menu-open` (a class toggle only) |
+| `#sidebar` / `#mainmenu` | 270 px left column | **off-canvas drawer.** A "☰" button (in the dock) toggles `html.gfm-menu-open` (a class toggle only). Entries are GfM's own 44 px buttons: the game's are 27 px slices of one sprite (`menu.png`, GCA's `menu_items.png`) and show the next slice at any other height |
 | `#content` | 540 px + 110 px padding | fit: 540 px, padding 0, centred. Fluid: `width:auto`, 8 px padding |
 | `#footer`, `#footer_background` | 362 px absolute art | static, compact, **legal links kept** |
 | `#banner_right`, `.banner1` | absolute at x = 882 | static block under the content |

@@ -73,6 +73,14 @@ test('header: no overlaps, vanilla and with GCA', async () => {
 	}
 });
 
+test('dock at the bottom of the phone screen, vanilla and with GCA', async () => {
+	for (const gca of [false, true]) {
+		const m = await open('location', { gca });
+		assert.equal(m.dockCount, 6, `gca=${gca}`);
+		assert.deepEqual(m.outOfDock, [], `gca=${gca}`);
+	}
+});
+
 // taps go through the stand-in for the game's touch handler, which cancels
 // clicks on anything that is not a link
 test('menu drawer opens and closes by tap, vanilla and with GCA', async () => {

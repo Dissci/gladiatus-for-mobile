@@ -7,8 +7,9 @@ Gladiatus was built for 920 px desktop screens. On a phone you get a tiny
 zoomed-out page, or a lot of sideways scrolling. Gladiatus for mobile
 rearranges the page so it fits your phone:
 
-- the header becomes a compact status bar
-- the menu becomes a drawer
+- the header becomes a compact status bar, and HP, expedition / dungeon points
+  and the four cooldown buttons sit in a dock at the bottom, in thumb reach
+- the menu becomes a drawer with touch-sized buttons
 - lists, reports and forms reflow to the screen width
 - inventory pages become one clean column that keeps the game's own drag-and-drop working
 

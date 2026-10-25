@@ -26,6 +26,17 @@ still broken. Causes found and fixed (see Done):
   link, form field or label** (it takes the tap as "show tooltip"). GfM's own
   controls must therefore be `<a role="button">`, never `<button>` or `<div>`.
 
+Session 3 (screenshots of 2026-10-24 evening): the drawer opened and its
+links worked, but every entry showed two half buttons, and the header still
+took about half the screen. Causes and fixes (see Done):
+
+- **The game's menu buttons are 27 px slices of one sprite** (`menu.png`;
+  GCA's `menu_items.png`). GfM made them 44 px tall, so each showed the top
+  of the next slice. The drawer now draws its own buttons.
+- The header kept HP, points and the four cooldown bars at the top. On the
+  user's suggestion they moved to a **dock at the bottom of the screen**, in
+  thumb reach, with ☰ at its left end.
+
 **Re-test on the phone is next.**
 
 **Overflow report (`npm run shots`, 37 saved pages × 360 / 390 / 412 px = 111 views).**
@@ -39,11 +50,12 @@ the screen edge, or content needs the last-resort sideways scroll inside
 | 2026-10-24 | 27 / 111 | shell fixed; 9 pages left, all page content |
 | 2026-10-24 | 18 / 111 | pantheon quests, missions, messages fixed after phone session 1 |
 | 2026-10-24 | 18 / 111 | header rebuilt as a grid, Gameforge bar in the flow (phone session 2); same pages left |
+| 2026-10-25 | 18 / 111 | bottom dock and drawer buttons (phone session 3); same pages left |
 
 | # | Step | Effort | Done when |
 |---|---|---|---|
-| 1 | **Re-test on the phone** (`npm run android`): ☰ opens and the backdrop closes the drawer; the header from the top and while scrolling; messages Move / Delete / Report; missions. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
-| 2 | **Header polish** after the phone check: the grid is in place (links · icons, gold, level · HP · XP · points · ranks · cooldowns 2×2 · tabs), but icons and bars could only be checked without the game's images. Fine-tune spacing and sizes on the device | S | Header readable at 360 px on the phone |
+| 1 | **Re-test on the phone** (`npm run android`): the drawer buttons and GCA's + / > quick links; the bottom dock (HP bar, points, cooldown buttons with the game's bar images, which the preview lacks); the header from the top and while scrolling; messages Move / Delete / Report; missions. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
+| 2 | **Header and dock polish** after the phone check: top grid (links · icons, gold, level · XP, ranks · GCA extras · tabs) and dock (☰, HP, points · 4 cooldowns) are in place, but icons and bars could only be checked without the game's images. Fine-tune spacing and sizes on the device | S | Header and dock readable at 360 px on the phone |
 | 3 | **Page content**, from the report: gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), the loot modal (`#blackoutDialog`), merchant inventory tabs (`#inventory_nav`, fit) | M | 0 bad views |
 | 4 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
 | 5 | `npm run shots -- --gca`: the screenshot report with GCA's stylesheet (the preview already has `?gca=1`) | S | Report run with and without GCA |
@@ -58,6 +70,7 @@ the screen edge, or content needs the last-resort sideways scroll inside
 - [x] **Bug found and fixed:** the ☰ button showed as a plain button at the bottom of every page on desktop
 - [x] Phone session 1 fixes: **the ☰ button was covered** by the Gameforge bar (and by GCA's fixed bar when scrolled), so the drawer could not open. It is now a floating button at the bottom left, above everything, and the closed drawer is hidden instead of peeking out at the left edge. **GCA's "top fixed bar"** pinned header values at desktop positions when scrolling; on phones they stay in the header and the bar is hidden. **GCA's moved event bar** pushed the banner 155 px into the header; undone. **Pantheon quests, missions and messages** reflow to the screen width, so the accept / decline buttons and Move / Delete / Report are on screen. Anything still too wide now scrolls inside the content instead of being cut off
 - [x] Phone session 2 fixes: **the drawer button and backdrop are links now** (`<a role="button">`). As a `<button>`/`<div>` their clicks were cancelled by the game's touch handler; checked against the real handler on the saved pages (`?scripts=1`) and by a stand-in in the Chrome tests. **Header rebuilt as a 6-column grid** (see step 2), GCA's "extend" HP/XP offsets undone, and **the Gameforge bar is in the flow at the top** instead of absolute over the header (its markup is at the end of `<body>`, so `<body>` is a flex column with the bar ordered first). Preview: `?gca=1` adds GCA's real stylesheet (v4.3.12, downloaded once into `fixtures/_gca/`)
+- [x] Phone session 3 fixes: **drawer entries are GfM's own 44 px buttons** (gradient, border; active and premium marked) instead of the game's 27 px sprite slices, which showed two half buttons each; GCA's + / > quick links and their link rows are 44 px touch targets. **Bottom dock**: HP bar, expedition / dungeon points and the four cooldown buttons are `position: fixed` at the bottom (the game's own elements, nothing moved in the DOM), ☰ sits at the dock's left end, the page and the drawer keep room for it. The top header is about 40 % shorter: GCA's attack timers, global arena timer and header buttons are packed into the grid, sub-tabs last. Browser tests: the dock stays in the lowest 100 px (vanilla, GCA, scrolled) and drawer entries are ≥ 44 px without the sprite; both fail on the old CSS
 - [x] Shell-wide overflow: the Gameforge bar (`#mmoContent` 585 px), `#banner_event` and its link, the cooldown bar fills and links, the HP/XP percentages, the header link row. Header boxes are `relative` with the desktop offsets reset, so their absolute children stay inside them
 - [x] `npm run android` fixed: it targeted Firefox Nightly (`org.mozilla.fenix`) instead of the Play Store Firefox, and web-ext needs the device ID. `scripts/android.mjs` now picks the phone and the installed Firefox, and explains the usual setup errors
 
@@ -80,7 +93,8 @@ The goal is that every page fits the screen width and the whole game can be navi
 - [x] Browser tests in CI: Firefox add-on + Chrome userscript (`tests/e2e/`)
 - [x] Viewport injection per mode (fit / fluid) at `document_start` (`boot.js`). Verified in Firefox (tag set) and Chrome emulation (tag applied)
 - [~] Shell reflow: wrapper widths, status-bar header (gold, rubies, level, HP/XP, points, cooldowns) (`base.css`). Overflows on every saved page (next steps 1-2)
-- [~] `#mainnav` as a scroll strip, `#mainmenu` as an off-canvas drawer (☰) (`base.css`, `layout.js`). The drawer opens on all 37 saved pages and in both test browsers, also with GCA; phone re-test pending
+- [~] `#mainnav` as a scroll strip, `#mainmenu` as an off-canvas drawer (☰) (`base.css`, `layout.js`). The drawer opens on the phone (session 3); its own touch-sized buttons are new and need a phone re-test
+- [~] Bottom dock: HP, expedition / dungeon points, cooldown buttons (`base.css`). Tested in both browsers and on the saved pages; phone check pending
 - [~] Footer, banners and buff bar repositioned (ads kept, not hidden). The buff bar has no rule yet
 - [~] Location page: enemy cards 2×2, 44 px attack buttons (`pages/location.css`). Looks right in the screenshots; device check pending
 - [~] Dungeon: fit mode, map stays at native size and is centred (`pages/dungeon.css`, centring missing)

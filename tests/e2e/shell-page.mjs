@@ -22,7 +22,7 @@ ul#mainnav { position: absolute; left: 393px; top: 190px; width: 573px; margin: 
 ul#mainnav table { position: relative; top: 4px; }
 #main { width: 920px; }
 #sidebar { float: left; width: 222px; padding: 0 24px; }
-#mainmenu a.menuitem { display: block; height: 28px; }
+#mainmenu a.menuitem { display: block; height: 24px; padding-top: 3px; background: url(/cdn/img/menu.png) no-repeat 0 0; }
 #content { float: right; width: 540px; padding: 0 55px; }
 #footer { clear: both; width: 920px; height: 362px; position: relative; }
 #footer_inner { position: absolute; left: 100px; top: 200px; width: 720px; }
@@ -98,6 +98,7 @@ export function shellPage(bodyId, options = {}) {
 		<div id="header_values_level">87</div>
 		<div id="header_values_hp"${gca ? ' class="header_values_hp-fixed-bar"' : ''}><div id="header_values_hp_percent">80%</div>HP 1200 / 1500</div>
 		<div id="header_values_xp">XP 40 %</div>
+		<div id="header_values_pve" class="header_box_big"><div><div id="icon_expeditionpoints" class="headericon_big"></div><div class="headervalue_big">36 / 36</div></div><br class="clearfloat"><div><div id="icon_dungeonpoints" class="headericon_big"></div><div class="headervalue_big">24 / 24</div></div></div>
 		${['expedition', 'dungeon', 'arena', 'ct'].map((c) => `<div id="cooldown_bar_${c}" class="cooldown_bar"><div class="cooldown_bar_fill"></div><a class="cooldown_bar_link" href="#"></a>${c}</div>`).join('\n\t\t')}
 		<ul id="mainnav"><li><table><tr>${[1, 2, 3, 4, 5, 6].map((n) => `<td><a href="#">Sub-tab ${n}</a></td>`).join('')}</tr></table></li></ul>
 	</div>
@@ -163,11 +164,22 @@ export function measure() {
 	const b = button && button.getBoundingClientRect();
 	const atButton = b && document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
 	const fixedBar = document.getElementById('topFixedBar');
+	// the bottom dock: HP, points and cooldown buttons, in the lowest 100 px
+	const dock = [...document.querySelectorAll('#header_values_hp, #header_values_pve, #header_game .cooldown_bar')]
+		.map((el) => ({ id: el.id, r: el.getBoundingClientRect() }));
+	const outOfDock = dock.filter((d) => d.r.top < window.innerHeight - 100 || d.r.bottom > window.innerHeight).map((d) => d.id);
+	const menuItems = [...document.querySelectorAll('#mainmenu .menuitem')].map((el) => ({
+		height: el.getBoundingClientRect().height,
+		sprite: /url\(/.test(getComputedStyle(el).backgroundImage),
+	}));
 	return {
 		classes: html.className,
 		overlaps,
 		buttonOnTop: !!atButton && atButton === button,
 		atButton: atButton && (atButton.id || atButton.className),
+		dockCount: dock.length,
+		outOfDock,
+		menuItems,
 		fixedBarShown: !!fixedBar && getComputedStyle(fixedBar).display !== 'none',
 		clipped,
 		clippedBy,

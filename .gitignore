@@ -8,5 +8,8 @@ fixtures/
 *.htm
 *.html
 
+# phone screenshots show game assets and account data
+phone-screenshots/
+
 # local scratch scripts
 *.tmp.mjs

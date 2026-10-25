@@ -100,6 +100,26 @@ test('GCA: header values stay in the header, nothing overlaps', async () => {
 	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
 });
 
+test('dock: HP, points and cooldowns at the bottom, also with GCA and scrolled', async () => {
+	for (const gca of [false, true]) {
+		let m = await open('location', 390, { gca });
+		assert.equal(m.dockCount, 6, `gca=${gca}: HP, points and 4 cooldown bars`);
+		assert.deepEqual(m.outOfDock, [], `gca=${gca}`);
+		await page.evaluate(() => window.scrollTo(0, 400));
+		m = await page.evaluate(measure);
+		assert.deepEqual(m.outOfDock, [], `gca=${gca}, scrolled`);
+	}
+});
+
+test('drawer entries are touch-sized buttons, not sprite slices', async () => {
+	const m = await open('location', 390);
+	assert.ok(m.menuItems.length > 0);
+	for (const item of m.menuItems) {
+		assert.ok(item.height >= 44, `entry is ${item.height} px tall`);
+		assert.equal(item.sprite, false, "the game's 27 px sprite is replaced");
+	}
+});
+
 test('fit page: native content width, fit viewport tag', async () => {
 	const m = await open('overview', 390);
 	assert.equal(m.classes, 'gfm gfm-fit gfm-page-overview');

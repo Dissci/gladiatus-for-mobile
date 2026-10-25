@@ -12,6 +12,11 @@
 	--gfm-paper: #e7deb8;
 	--gfm-touch: 44px;
 	--gfm-gap: 8px;
+	/* the bottom dock: two rows (HP and points; cooldown buttons) */
+	--gfm-dock-row: 44px;
+	--gfm-dock-points: 168px;
+	--gfm-safe-bottom: env(safe-area-inset-bottom, 0px);
+	--gfm-dock-h: calc(var(--gfm-dock-row) * 2 + var(--gfm-safe-bottom));
 	/* above the Gameforge bar and GCA's fixed bars, which use very high z-indexes */
 	--gfm-z: 2147483000;
 }
@@ -34,9 +39,9 @@
 		min-height: 0;
 		background-position: 50% 0;
 	}
-	/* room to scroll the last controls above the floating menu button */
+	/* room to scroll the last controls above the dock */
 	html.gfm body {
-		padding-bottom: calc(var(--gfm-touch) + var(--gfm-gap) * 4);
+		padding-bottom: calc(var(--gfm-dock-h) + var(--gfm-gap) * 2);
 	}
 	html.gfm #container_game,
 	html.gfm #main,
@@ -46,27 +51,27 @@
 		top: 0;
 	}
 
-	/* --- header → status bar ---
-	   A 6-column grid (docs/ANALYSIS.md §4.3):
+	/* --- header → compact status bar at the top + dock at the bottom ---
+	   Top, a 6-column grid (docs/ANALYSIS.md §4.3):
 	     links row (Help … Logout, server time)                  full width
 	     news/messages/packages/reports icons | gold, highscore | level
-	     HP | XP
-	     expedition + dungeon points | arena + circus ranks
-	     cooldown bars, 2 × 2
+	     XP | arena + circus ranks
 	     sub-tabs, then anything else (GCA extras)             full width
 	   Dense flow fills the gap in row 2 with the level box, which comes
-	   later in the markup. */
+	   later in the markup.
+	   Bottom, in thumb reach, a fixed dock (see below): HP, expedition and
+	   dungeon points, and the four cooldown buttons. */
 	html.gfm #header_game {
 		width: auto;
 		height: auto;
 		margin: 0;
-		padding: var(--gfm-gap);
+		padding: 6px var(--gfm-gap);
 		background: var(--gfm-bar-bg);
 		color: var(--gfm-bar-fg);
 		display: grid;
 		grid-template-columns: repeat(6, minmax(0, 1fr));
 		grid-auto-flow: row dense;
-		gap: 6px var(--gfm-gap);
+		gap: 4px var(--gfm-gap);
 		align-items: center;
 		text-align: left;
 	}
@@ -87,8 +92,12 @@
 	html.gfm #header_game > .container {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0 var(--gfm-gap);
-		font-size: 12px;
+		justify-content: space-between;
+		gap: 0 6px;
+		width: auto;
+	}
+	html.gfm #header_game > .container span {
+		padding: 2px 0;
 	}
 	html.gfm #header_game > #header_menue {
 		grid-column: span 3;
@@ -99,17 +108,36 @@
 	html.gfm #header_game > #header_values_general {
 		grid-column: span 1;
 	}
-	html.gfm #header_game > #header_values_hp,
-	html.gfm #header_game > #header_values_xp,
-	html.gfm #header_game > #header_values_pve,
-	html.gfm #header_game > #header_values_pvp,
-	html.gfm #header_game > .cooldown_bar {
-		grid-column: span 3;
+	html.gfm #header_game > #header_values_xp {
+		grid-column: span 4;
+	}
+	html.gfm #header_game > #header_values_pvp {
+		grid-column: span 2;
 	}
 	html.gfm #header_game > .header_box,
 	html.gfm #header_game > .header_box_big {
 		width: auto;
 		height: auto;
+	}
+	/* arena and circus ranks side by side */
+	html.gfm #header_values_pvp {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--gfm-gap);
+	}
+	html.gfm #header_values_pvp > div,
+	html.gfm #header_values_pve > div {
+		display: flex;
+		align-items: center;
+		white-space: nowrap;
+	}
+	html.gfm #header_values_pvp .clearfloat,
+	html.gfm #header_values_pve .clearfloat {
+		display: none;
+	}
+	html.gfm #header_game .headervalue_big {
+		margin-top: 0;
+		font-size: 14px;
 	}
 
 	/* HP / XP: the bar (fill width is a percentage) stretches, the percentage
@@ -121,7 +149,6 @@
 		height: auto;
 		text-align: left;
 	}
-	html.gfm #header_values_hp_bar,
 	html.gfm #header_values_xp_bar {
 		position: relative;
 		left: auto;
@@ -129,7 +156,6 @@
 		width: calc(100% - 34px);
 		margin: 4px 0;
 	}
-	html.gfm #header_values_hp_percent,
 	html.gfm #header_values_xp_percent {
 		left: auto;
 		right: 0;
@@ -143,14 +169,9 @@
 		margin: 0;
 		text-align: left;
 	}
-	html.gfm #header_life_pot {
-		display: inline-block;
-		vertical-align: middle;
-	}
 
 	/* cooldown bars: the bar image, fill and link are sized for 138 px */
 	html.gfm #header_game .cooldown_bar {
-		width: auto;
 		background-size: 100% 100%;
 	}
 	html.gfm #header_game .cooldown_bar_text,
@@ -160,6 +181,106 @@
 	html.gfm #header_values_hp_xp_background,
 	html.gfm #banner_top {
 		display: none;
+	}
+
+	/* --- the dock: HP, points and cooldowns, fixed at the bottom ---
+	   The game's own elements, only placed differently (position: fixed),
+	   so the game and GCA keep updating them and the links stay theirs.
+	     row 1: ☰ (ours) | HP bar | expedition points | dungeon points
+	     row 2: expedition | dungeon | arena | circus cooldown buttons
+	   !important and the ids outrank the header rule above and GCA's
+	   "top fixed bar" classes (compat-gca.css). */
+	html.gfm #header_game::before {
+		content: "";
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: calc(var(--gfm-z) - 2);
+		height: var(--gfm-dock-h);
+		border-top: 1px solid var(--gfm-accent);
+		background: var(--gfm-bar-bg);
+		box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.5);
+	}
+	html.gfm #header_game > #header_values_hp,
+	html.gfm #header_game > #header_values_pve,
+	html.gfm #header_game > .cooldown_bar:is(#cooldown_bar_expedition, #cooldown_bar_dungeon, #cooldown_bar_arena, #cooldown_bar_ct) {
+		position: fixed !important;
+		z-index: calc(var(--gfm-z) - 1) !important;
+		top: auto !important;
+		box-sizing: border-box;
+		margin: 0 !important;
+	}
+	/* row 1 */
+	html.gfm #header_game > #header_values_hp {
+		left: calc(var(--gfm-touch) + var(--gfm-gap)) !important;
+		right: calc(var(--gfm-dock-points) + var(--gfm-gap)) !important;
+		bottom: calc(var(--gfm-dock-row) + var(--gfm-safe-bottom)) !important;
+		height: var(--gfm-dock-row);
+		display: flex;
+		flex-wrap: wrap;
+		align-content: center;
+		align-items: center;
+		gap: 2px 6px;
+	}
+	html.gfm #header_values_hp_bar {
+		position: relative;
+		left: auto;
+		top: auto;
+		flex: 1 1 100%;
+		width: auto;
+		margin: 0;
+	}
+	html.gfm #header_values_hp_percent {
+		position: static;
+		order: 2;
+		width: auto;
+	}
+	html.gfm #header_values_hp_points {
+		order: 1;
+		font-size: 12px;
+	}
+	html.gfm #header_life_pot {
+		order: 3;
+		margin-left: auto;
+	}
+	html.gfm #header_game > #header_values_pve {
+		left: auto !important;
+		right: 4px !important;
+		bottom: calc(var(--gfm-dock-row) + var(--gfm-safe-bottom)) !important;
+		width: var(--gfm-dock-points);
+		height: var(--gfm-dock-row);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	/* row 2: four equal buttons, two lines of text allowed */
+	html.gfm #header_game > .cooldown_bar:is(#cooldown_bar_expedition, #cooldown_bar_dungeon, #cooldown_bar_arena, #cooldown_bar_ct) {
+		bottom: calc(var(--gfm-safe-bottom) + 3px) !important;
+		width: calc(25% - 4px);
+		height: calc(var(--gfm-dock-row) - 6px);
+	}
+	html.gfm #header_game > #cooldown_bar_expedition { left: 2px !important; }
+	html.gfm #header_game > #cooldown_bar_dungeon { left: calc(25% + 2px) !important; }
+	html.gfm #header_game > #cooldown_bar_arena { left: calc(50% + 2px) !important; }
+	html.gfm #header_game > #cooldown_bar_ct { left: calc(75% + 2px) !important; }
+	html.gfm #header_game .cooldown_bar_fill {
+		top: 0;
+		left: 0;
+		height: 100%;
+	}
+	html.gfm #header_game .cooldown_bar_text {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		padding: 0 2px;
+		font-size: 11px;
+		line-height: 1.15;
+	}
+	html.gfm #header_game .cooldown_bar_link {
+		height: 100%;
+		box-sizing: border-box;
 	}
 
 	/* --- Gameforge network bar: kept, but no wider than the screen ---
@@ -201,8 +322,10 @@
 		width: 100%;
 	}
 
-	/* --- module sub-tabs → horizontal scroll strip --- */
+	/* --- module sub-tabs → horizontal scroll strip, last in the header,
+	   right above the content --- */
 	html.gfm ul#mainnav {
+		order: 1;
 		flex: 1 1 100%;
 		width: auto;
 		height: auto;
@@ -233,10 +356,12 @@
 		z-index: calc(var(--gfm-z) + 1);
 		width: min(280px, 85vw);
 		margin: 0;
-		padding: var(--gfm-gap);
+		padding: var(--gfm-gap) var(--gfm-gap) calc(var(--gfm-dock-h) + var(--gfm-gap));
 		box-sizing: border-box;
 		overflow-y: auto;
-		background-color: var(--gfm-bar-bg);
+		overscroll-behavior: contain;
+		background: var(--gfm-bar-bg);
+		box-shadow: 2px 0 12px rgba(0, 0, 0, 0.6);
 		transform: translateX(-105%);
 		visibility: hidden;
 		transition: transform 0.2s ease, visibility 0.2s;
@@ -245,20 +370,93 @@
 		transform: none;
 		visibility: visible;
 	}
-	html.gfm #sidebar_inner {
+	html.gfm #sidebar_inner,
+	html.gfm #mainmenu,
+	html.gfm #mainmenu .submenu {
 		width: auto;
 		margin: 0;
 		padding: 0;
+		background: none;
 	}
-	html.gfm #sidebar_footer {
+	html.gfm #sidebar_footer,
+	html.gfm #submenufooter {
 		display: none;
 	}
-	html.gfm #mainmenu a.menuitem {
+
+	/* Menu entries: the game's buttons are 27 px slices of one sprite
+	   (menu.png, GCA's menu_items.png); any other height shows the next
+	   slice. GfM draws its own full-width, touch-sized buttons instead.
+	   No `position` here: GCA hides merged entries with position:absolute. */
+	html.gfm #mainmenu .menuitem {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		width: auto;
+		height: auto;
 		min-height: var(--gfm-touch);
+		margin: 0 0 4px;
+		padding: 2px var(--gfm-touch);
+		border: 1px solid #6b4a24;
+		border-radius: 4px;
+		background: linear-gradient(#6a1d12, #431009) !important;
+		font-size: 14px;
+		line-height: 1.2;
+		text-shadow: 0 1px 2px #000;
+	}
+	html.gfm #mainmenu .menuitem.active,
+	html.gfm #mainmenu .menuitem.advanced_menu_link_active {
+		border-color: var(--gfm-accent);
+		background: linear-gradient(#8a2a17, #5a170c) !important;
+	}
+	html.gfm #mainmenu .menuitem.premium {
+		border-color: #a07a2a;
+		background: linear-gradient(#5b3a0c, #3a2406) !important;
+	}
+	/* city / country switch: one row above each submenu, sprite kept */
+	html.gfm #submenuhead1,
+	html.gfm #submenuhead2 {
+		margin: var(--gfm-gap) auto 4px;
+	}
+	html.gfm #mainmenu .advanced_menu_entry {
+		height: auto;
+	}
+	/* GCA's "+" / ">" quick-link toggle, at the right end of its entry */
+	html.gfm #mainmenu .advanced_menu_shift {
+		top: 0;
+		right: 0;
+		width: var(--gfm-touch);
+		height: var(--gfm-touch);
 		line-height: var(--gfm-touch);
+		border-left: 1px solid #6b4a24;
+		background: none;
+		color: var(--gfm-bar-fg);
+		font-size: 16px;
+	}
+	html.gfm #mainmenu .advanced_menu_back_links {
+		height: auto;
+		margin: 0 0 4px;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+	html.gfm #mainmenu .advanced_menu_back_links[style*="block"] {
+		display: flex !important;
+	}
+	html.gfm #mainmenu .advanced_menu_back_links a {
+		flex: 1 0 var(--gfm-touch);
+		width: auto;
+		height: var(--gfm-touch);
+		line-height: var(--gfm-touch);
+		border: 1px solid #6b4a24;
+		border-radius: 4px;
+		background: #3a2410 !important;
+	}
+	html.gfm #mainmenu .advanced_menu_side_icon {
+		top: 15px;
+		left: 6px;
 	}
 
-	/* floating, bottom left: in thumb reach, and clear of the bars at the top */
+	/* ☰: in the dock's first row, bottom left, in thumb reach */
 	#gfm-menu-button {
 		display: flex;
 		align-items: center;
@@ -266,19 +464,18 @@
 		box-sizing: border-box;
 		text-decoration: none;
 		position: fixed;
-		left: calc(var(--gfm-gap) * 1.5);
-		bottom: calc(var(--gfm-gap) * 1.5 + env(safe-area-inset-bottom, 0px));
+		left: 4px;
+		bottom: calc(var(--gfm-dock-row) + var(--gfm-safe-bottom));
 		z-index: calc(var(--gfm-z) + 2);
-		width: calc(var(--gfm-touch) + 4px);
-		height: calc(var(--gfm-touch) + 4px);
+		width: var(--gfm-touch);
+		height: var(--gfm-touch);
 		padding: 0;
 		border: 1px solid var(--gfm-accent);
-		border-radius: 50%;
+		border-radius: 6px;
 		background: var(--gfm-bar-bg);
 		color: var(--gfm-bar-fg);
-		font-size: 24px;
+		font-size: 22px;
 		line-height: 1;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 	}
 	html.gfm.gfm-menu-open #gfm-menu-backdrop {
 		display: block;
@@ -287,7 +484,6 @@
 		z-index: var(--gfm-z);
 		background: rgba(0, 0, 0, 0.5);
 	}
-
 	/* --- content --- */
 	html.gfm #content {
 		float: none;

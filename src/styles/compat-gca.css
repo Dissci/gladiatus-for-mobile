@@ -15,7 +15,34 @@
 		flex: 1 1 100%;
 		display: flex;
 		flex-wrap: wrap;
-		gap: 4px;
+		gap: 2px;
+	}
+
+	/* GCA's header extras, packed into the header grid (base.css):
+	   "attacked" timers (a 192 × 108 picture frame on desktop) | global
+	   arena timer, then the stats icon and GCA's header buttons on one row */
+	html.gfm #header_game > .attacked_timers_back {
+		grid-column: span 4;
+		width: auto;
+		height: auto;
+		margin: 0 !important;
+	}
+	html.gfm .attacked_timers_back::before {
+		display: none;
+	}
+	html.gfm .attacked_timers_table {
+		width: auto;
+		margin: 0;
+	}
+	html.gfm #header_game > #cooldown_bar_ga {
+		grid-column: span 2;
+		width: auto;
+	}
+	html.gfm #header_game > #exp_and_gold_stats_icon {
+		grid-column: span 1;
+	}
+	html.gfm #header_game > .gca-header-buttons-wrapper {
+		grid-column: span 5;
 	}
 
 	/*
