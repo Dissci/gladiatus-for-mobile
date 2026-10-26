@@ -28,6 +28,9 @@ const TYPES = {
 	'.woff': 'font/woff',
 	'.woff2': 'font/woff2',
 	'.ttf': 'font/ttf',
+	// the Gameforge bar's images on gfsrv.net: PNG data with their own endings
+	'.sprites': 'image/png',
+	'.bg': 'image/png',
 };
 
 /** Only these hosts, only static file types. */
@@ -67,9 +70,12 @@ export async function getAsset(url, fixtures, { offline = false } = {}) {
 	if (existsSync(file + '.missing')) return null;
 	if (existsSync(file)) return { type, body: readFileSync(file) };
 	if (offline) return null;
+	// protocol-relative links (//host/...) on the http:// preview page come in
+	// as http://, which the game servers refuse
+	const secure = url.replace(/^http:/, 'https:');
 	let res;
 	try {
-		res = await fetch(url, { redirect: 'error', credentials: 'omit' });
+		res = await fetch(secure, { redirect: 'error', credentials: 'omit' });
 	} catch {
 		return null; // offline or redirected: leave it uncached and try next time
 	}

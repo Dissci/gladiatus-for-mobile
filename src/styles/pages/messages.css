@@ -24,4 +24,22 @@
 		padding-left: var(--gfm-gap);
 		padding-right: var(--gfm-gap);
 	}
+	/* Move / Delete / Report / Answer: floated right in a footer of no height,
+	   so they hung below the message, over the next one. A row of touch-sized
+	   links inside the message instead; row-reverse keeps the game's order. */
+	html.gfm-page-messages #content .message_footer {
+		display: flex;
+		flex-direction: row-reverse;
+		flex-wrap: wrap;
+		gap: 0 4px;
+		width: auto;
+		height: auto;
+	}
+	html.gfm-page-messages #content .message_footer a {
+		float: none;
+		min-width: var(--gfm-touch);
+		padding: 0 6px;
+		line-height: var(--gfm-touch);
+		text-align: center;
+	}
 }

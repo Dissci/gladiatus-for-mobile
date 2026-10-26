@@ -100,15 +100,21 @@ test('GCA: header values stay in the header, nothing overlaps', async () => {
 	assert.equal(m.clipped, 0, `${m.clippedBy} is cut off by ${m.clipped} px`);
 });
 
-test('dock: HP, points and cooldowns at the bottom, also with GCA and scrolled', async () => {
+test('dock: HP, XP, points, ranks and cooldowns at the bottom, also with GCA and scrolled', async () => {
 	for (const gca of [false, true]) {
 		let m = await open('location', 390, { gca });
-		assert.equal(m.dockCount, 6, `gca=${gca}: HP, points and 4 cooldown bars`);
+		assert.equal(m.dockCount, 10, `gca=${gca}: HP, XP, 2 points, 2 ranks, 4 cooldown bars`);
 		assert.deepEqual(m.outOfDock, [], `gca=${gca}`);
 		await page.evaluate(() => window.scrollTo(0, 400));
 		m = await page.evaluate(measure);
 		assert.deepEqual(m.outOfDock, [], `gca=${gca}, scrolled`);
 	}
+});
+
+test('every sub-tab and an open dialog are on screen', async () => {
+	const m = await open('location', 360);
+	assert.deepEqual(m.tabsOffScreen, [], 'tabs cut off at the edge');
+	assert.deepEqual(m.dialogsOffScreen, [], 'dialog at its desktop position');
 });
 
 test('drawer entries are touch-sized buttons, not sprite slices', async () => {

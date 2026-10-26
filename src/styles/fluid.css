@@ -65,4 +65,21 @@
 	html.gfm-fluid #content button {
 		min-height: var(--gfm-touch);
 	}
+	/* The game's older buttons are 159 / 119 / 79 × 26 px slices of one sprite
+	   (interface.png); taller, they show the next slice and the label spills
+	   out ("Search for opponent"). Drawn like the game's awesome-buttons. */
+	html.gfm-fluid #content input.button1,
+	html.gfm-fluid #content input.button2,
+	html.gfm-fluid #content input.button3 {
+		width: auto;
+		min-width: 120px;
+		height: auto;
+		padding: 0 16px;
+		border: 1px solid #4a3615;
+		border-radius: 4px;
+		background: linear-gradient(#c3ab6f, #886933);
+		color: #2b1d10;
+		font-size: 14px;
+		font-weight: bold;
+	}
 }

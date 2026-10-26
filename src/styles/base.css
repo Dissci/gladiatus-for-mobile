@@ -12,11 +12,12 @@
 	--gfm-paper: #e7deb8;
 	--gfm-touch: 44px;
 	--gfm-gap: 8px;
-	/* the bottom dock: two rows (HP and points; cooldown buttons) */
+	/* the bottom dock: HP and XP; cooldown buttons under their values */
 	--gfm-dock-row: 44px;
-	--gfm-dock-points: 168px;
+	--gfm-dock-row2: 62px;
+	--gfm-cooldown-h: 30px;
 	--gfm-safe-bottom: env(safe-area-inset-bottom, 0px);
-	--gfm-dock-h: calc(var(--gfm-dock-row) * 2 + var(--gfm-safe-bottom));
+	--gfm-dock-h: calc(var(--gfm-dock-row) + var(--gfm-dock-row2) + var(--gfm-safe-bottom));
 	/* above the Gameforge bar and GCA's fixed bars, which use very high z-indexes */
 	--gfm-z: 2147483000;
 }
@@ -33,6 +34,10 @@
 	html.gfm,
 	html.gfm body {
 		overflow-x: hidden;
+	}
+	/* below the footer, where the page keeps room for the dock */
+	html.gfm {
+		background: #1c1209;
 	}
 	html.gfm #wrapper_game {
 		min-width: 0;
@@ -51,16 +56,27 @@
 		top: 0;
 	}
 
+	/* the desktop art is 920 px: its parchment runs from x = 276 to 843, with
+	   the sidebar's stone pillar left of it. Centred on a phone, the pillar
+	   showed beside the content, which looked shifted left. Show the
+	   parchment only; the inner layer only shades the desktop sidebar. */
+	html.gfm #main {
+		background-position: -280px 0;
+	}
+	html.gfm #main_inner {
+		background-image: none;
+	}
+
 	/* --- header → compact status bar at the top + dock at the bottom ---
 	   Top, a 6-column grid (docs/ANALYSIS.md §4.3):
 	     links row (Help … Logout, server time)                  full width
-	     news/messages/packages/reports icons | gold, highscore | level
-	     XP | arena + circus ranks
-	     sub-tabs, then anything else (GCA extras)             full width
+	     news/messages/packages/reports icons | gold, highscore | rubies, level
+	     GCA extras (attack timers on one line, global arena, buttons)
+	     sub-tabs                                                full width
 	   Dense flow fills the gap in row 2 with the level box, which comes
 	   later in the markup.
-	   Bottom, in thumb reach, a fixed dock (see below): HP, expedition and
-	   dungeon points, and the four cooldown buttons. */
+	   Bottom, in thumb reach, a fixed dock (see below): HP and XP, and the
+	   four cooldown buttons, each with its points or rank. */
 	html.gfm #header_game {
 		width: auto;
 		height: auto;
@@ -108,86 +124,21 @@
 	html.gfm #header_game > #header_values_general {
 		grid-column: span 1;
 	}
-	html.gfm #header_game > #header_values_xp {
-		grid-column: span 4;
-	}
-	html.gfm #header_game > #header_values_pvp {
-		grid-column: span 2;
-	}
-	html.gfm #header_game > .header_box,
-	html.gfm #header_game > .header_box_big {
+	html.gfm #header_game > .header_box {
 		width: auto;
 		height: auto;
-	}
-	/* arena and circus ranks side by side */
-	html.gfm #header_values_pvp {
-		display: flex;
-		justify-content: flex-end;
-		gap: var(--gfm-gap);
-	}
-	html.gfm #header_values_pvp > div,
-	html.gfm #header_values_pve > div {
-		display: flex;
-		align-items: center;
-		white-space: nowrap;
-	}
-	html.gfm #header_values_pvp .clearfloat,
-	html.gfm #header_values_pve .clearfloat {
-		display: none;
-	}
-	html.gfm #header_game .headervalue_big {
-		margin-top: 0;
-		font-size: 14px;
-	}
-
-	/* HP / XP: the bar (fill width is a percentage) stretches, the percentage
-	   sits at its right end, the points go below. GCA's "extend" layout pulls
-	   the points up and left with negative margins. */
-	html.gfm #header_values_hp,
-	html.gfm #header_values_xp {
-		width: auto;
-		height: auto;
-		text-align: left;
-	}
-	html.gfm #header_values_xp_bar {
-		position: relative;
-		left: auto;
-		top: auto;
-		width: calc(100% - 34px);
-		margin: 4px 0;
-	}
-	html.gfm #header_values_xp_percent {
-		left: auto;
-		right: 0;
-		top: 0;
-		width: 30px;
-	}
-	html.gfm #header_values_hp_points,
-	html.gfm #header_values_xp_points {
-		display: inline-block;
-		width: auto;
-		margin: 0;
-		text-align: left;
-	}
-
-	/* cooldown bars: the bar image, fill and link are sized for 138 px */
-	html.gfm #header_game .cooldown_bar {
-		background-size: 100% 100%;
-	}
-	html.gfm #header_game .cooldown_bar_text,
-	html.gfm #header_game .cooldown_bar_link {
-		width: 100%;
 	}
 	html.gfm #header_values_hp_xp_background,
 	html.gfm #banner_top {
 		display: none;
 	}
 
-	/* --- the dock: HP, points and cooldowns, fixed at the bottom ---
+	/* --- the dock: fixed at the bottom ---
 	   The game's own elements, only placed differently (position: fixed),
 	   so the game and GCA keep updating them and the links stay theirs.
-	     row 1: ☰ (ours) | HP bar | expedition points | dungeon points
-	     row 2: expedition | dungeon | arena | circus cooldown buttons
+	     row 1: ☰ (ours) | HP bar | XP bar
+	     row 2: four columns, a cooldown button under its value:
+	            expedition points | dungeon points | arena rank | circus rank
 	   !important and the ids outrank the header rule above and GCA's
 	   "top fixed bar" classes (compat-gca.css). */
 	html.gfm #header_game::before {
@@ -202,8 +153,19 @@
 		background: var(--gfm-bar-bg);
 		box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.5);
 	}
-	html.gfm #header_game > #header_values_hp,
+	/* the points and ranks boxes dissolve: each value is placed on its own */
 	html.gfm #header_game > #header_values_pve,
+	html.gfm #header_game > #header_values_pvp {
+		display: contents;
+	}
+	html.gfm #header_values_pve .clearfloat,
+	html.gfm #header_values_pvp .clearfloat {
+		display: none;
+	}
+	html.gfm #header_game > #header_values_hp,
+	html.gfm #header_game > #header_values_xp,
+	html.gfm #header_values_pve > div,
+	html.gfm #header_values_pvp > div,
 	html.gfm #header_game > .cooldown_bar:is(#cooldown_bar_expedition, #cooldown_bar_dungeon, #cooldown_bar_arena, #cooldown_bar_ct) {
 		position: fixed !important;
 		z-index: calc(var(--gfm-z) - 1) !important;
@@ -211,19 +173,32 @@
 		box-sizing: border-box;
 		margin: 0 !important;
 	}
-	/* row 1 */
-	html.gfm #header_game > #header_values_hp {
-		left: calc(var(--gfm-touch) + var(--gfm-gap)) !important;
-		right: calc(var(--gfm-dock-points) + var(--gfm-gap)) !important;
-		bottom: calc(var(--gfm-dock-row) + var(--gfm-safe-bottom)) !important;
+
+	/* row 1: HP and XP, each a bar with its points and percentage below */
+	html.gfm #header_game > #header_values_hp,
+	html.gfm #header_game > #header_values_xp {
+		bottom: calc(var(--gfm-dock-row2) + var(--gfm-safe-bottom)) !important;
+		width: auto;
 		height: var(--gfm-dock-row);
 		display: flex;
 		flex-wrap: wrap;
 		align-content: center;
-		align-items: center;
-		gap: 2px 6px;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 3px 6px;
+		text-align: left;
 	}
-	html.gfm #header_values_hp_bar {
+	/* ☰ (44 px + 8) on the left, the rest split in two */
+	html.gfm #header_game > #header_values_hp {
+		left: calc(var(--gfm-touch) + var(--gfm-gap)) !important;
+		right: calc(50% - 20px) !important;
+	}
+	html.gfm #header_game > #header_values_xp {
+		left: calc(50% + 28px) !important;
+		right: var(--gfm-gap) !important;
+	}
+	html.gfm #header_values_hp_bar,
+	html.gfm #header_values_xp_bar {
 		position: relative;
 		left: auto;
 		top: auto;
@@ -231,34 +206,66 @@
 		width: auto;
 		margin: 0;
 	}
-	html.gfm #header_values_hp_percent {
+	html.gfm #header_values_hp_percent,
+	html.gfm #header_values_xp_percent {
 		position: static;
-		order: 2;
-		width: auto;
-	}
-	html.gfm #header_values_hp_points {
-		order: 1;
-		font-size: 12px;
-	}
-	html.gfm #header_life_pot {
 		order: 3;
-		margin-left: auto;
+		width: auto;
+		font-size: 11px;
 	}
-	html.gfm #header_game > #header_values_pve {
-		left: auto !important;
-		right: 4px !important;
-		bottom: calc(var(--gfm-dock-row) + var(--gfm-safe-bottom)) !important;
-		width: var(--gfm-dock-points);
-		height: var(--gfm-dock-row);
+	html.gfm #header_values_hp_points,
+	html.gfm #header_values_xp_points {
+		display: inline-block;
+		order: 1;
+		width: auto;
+		margin: 0;
+		font-size: 12px;
+		text-align: left;
+		white-space: nowrap;
+	}
+	html.gfm #header_values_hp_points span,
+	html.gfm #header_values_xp_points span {
+		font-size: inherit !important;
+	}
+	/* the life potion, between the HP points and the percentage */
+	html.gfm #header_life_pot {
+		order: 2;
+		margin-right: auto;
+	}
+
+	/* row 2: the values, centred above their buttons */
+	html.gfm #header_values_pve > div,
+	html.gfm #header_values_pvp > div {
+		bottom: calc(var(--gfm-safe-bottom) + var(--gfm-cooldown-h) + 4px) !important;
+		width: 25%;
+		height: calc(var(--gfm-dock-row2) - var(--gfm-cooldown-h) - 6px);
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		justify-content: center;
+		gap: 4px;
+		white-space: nowrap;
 	}
+	html.gfm #header_values_pve > div:first-child { left: 0 !important; }
+	html.gfm #header_values_pve > div:last-child { left: 25% !important; }
+	html.gfm #header_values_pvp > div:first-child { left: 50% !important; }
+	html.gfm #header_values_pvp > div:last-child { left: 75% !important; }
+	/* the icons are slices of one sprite (interface.png): native size only */
+	html.gfm #header_game .headericon_big {
+		width: 25px;
+		height: 25px;
+		margin: 0;
+	}
+	html.gfm #header_game .headervalue_big {
+		margin: 0;
+		font-size: 13px;
+	}
+
 	/* row 2: four equal buttons, two lines of text allowed */
 	html.gfm #header_game > .cooldown_bar:is(#cooldown_bar_expedition, #cooldown_bar_dungeon, #cooldown_bar_arena, #cooldown_bar_ct) {
 		bottom: calc(var(--gfm-safe-bottom) + 3px) !important;
 		width: calc(25% - 4px);
-		height: calc(var(--gfm-dock-row) - 6px);
+		height: var(--gfm-cooldown-h);
+		background-size: 100% 100%;
 	}
 	html.gfm #header_game > #cooldown_bar_expedition { left: 2px !important; }
 	html.gfm #header_game > #cooldown_bar_dungeon { left: calc(25% + 2px) !important; }
@@ -274,11 +281,13 @@
 		align-items: center;
 		justify-content: center;
 		box-sizing: border-box;
+		width: 100%;
 		padding: 0 2px;
 		font-size: 11px;
 		line-height: 1.15;
 	}
 	html.gfm #header_game .cooldown_bar_link {
+		width: 100%;
 		height: 100%;
 		box-sizing: border-box;
 	}
@@ -292,20 +301,56 @@
 		display: flex;
 		flex-direction: column;
 	}
+	/* One 32 px line: logo | country (flag only) | "More games" at the right.
+	   Its boxes are sized for 585 px and wrapped into three lines (~105 px). */
 	html.gfm #mmonetbar {
 		position: relative !important;
 		order: -1;
-		height: auto;
-		/* its texture is 32 px tall; the colour covers a second line */
+		height: 32px;
 		background-color: #1c1209;
 	}
-	html.gfm #mmoContent {
-		width: auto;
+	html.gfm #mmonetbar #mmoContent {
+		display: flex;
+		align-items: center;
+		width: auto !important;
 		max-width: 100%;
 	}
-	html.gfm #mmoGame {
+	html.gfm #mmonetbar #mmoLogo {
+		flex: none;
+	}
+	html.gfm #mmonetbar .mmoGame {
+		display: flex;
 		width: auto;
-		max-width: calc(100% - 108px);
+		margin: 0 0 0 4px;
+	}
+	html.gfm #mmonetbar .mmoGame #mmoLangs {
+		width: auto;
+	}
+	html.gfm #mmonetbar .mmoBoxMiddle {
+		width: auto !important;
+	}
+	html.gfm #mmonetbar .mmoGame label {
+		display: none;
+	}
+	html.gfm #mmonetbar #mmoLangSelect {
+		width: 44px;
+		overflow: hidden;
+	}
+	html.gfm #mmonetbar #mmoLangs .mmoSelectText {
+		width: 22px;
+		overflow: hidden;
+	}
+	html.gfm #mmoGamesOverviewPanel {
+		width: auto;
+		left: auto !important;
+		right: 0;
+	}
+	html.gfm #mmoGamesOverviewToggle {
+		width: auto;
+		padding: 4px var(--gfm-gap);
+	}
+	html.gfm #mmoGamesOverviewLists {
+		width: min(580px, 100vw);
 	}
 
 	/* --- event banner: under the header instead of at x = 353 --- */
@@ -322,8 +367,12 @@
 		width: 100%;
 	}
 
-	/* --- module sub-tabs → horizontal scroll strip, last in the header,
-	   right above the content --- */
+	/* --- module sub-tabs, last in the header, right above the content ---
+	   The game puts them in a table: one cell per tab (arena) or all tabs in
+	   one cell (packages). The table is flattened so the tabs wrap onto as
+	   many lines as needed and none is cut off at the screen edge. A long
+	   set in one cell (the 22 package filters) stays one line that scrolls
+	   sideways instead of filling the screen. */
 	html.gfm ul#mainnav {
 		order: 1;
 		flex: 1 1 100%;
@@ -334,13 +383,34 @@
 		background: none;
 		scroll-snap-type: x proximity;
 	}
-	html.gfm ul#mainnav table {
-		top: 0 !important;
-		height: auto !important;
+	html.gfm ul#mainnav > li {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		margin: 0;
 	}
-	html.gfm ul#mainnav a {
-		min-height: var(--gfm-touch);
+	html.gfm ul#mainnav table,
+	html.gfm ul#mainnav tbody,
+	html.gfm ul#mainnav tr,
+	html.gfm ul#mainnav td {
+		display: contents;
+	}
+	html.gfm ul#mainnav > li:has(td > a.awesome-tabs:nth-of-type(9)) {
+		flex-wrap: nowrap;
+	}
+	/* !important: GCA squeezes the packages tabs to 17 px (packages_shortcuts)
+	   and pads long tabs (gca_long_tabs) for the desktop width */
+	html.gfm ul#mainnav a.awesome-tabs {
+		flex: 1 0 auto;
+		box-sizing: border-box;
+		width: auto !important;
+		min-width: var(--gfm-touch);
+		height: var(--gfm-touch);
+		margin: 0;
+		padding: 0 12px !important;
+		line-height: calc(var(--gfm-touch) - 6px);
 		white-space: nowrap;
+		text-overflow: clip;
 		scroll-snap-align: start;
 	}
 
@@ -465,7 +535,7 @@
 		text-decoration: none;
 		position: fixed;
 		left: 4px;
-		bottom: calc(var(--gfm-dock-row) + var(--gfm-safe-bottom));
+		bottom: calc(var(--gfm-dock-row2) + var(--gfm-safe-bottom));
 		z-index: calc(var(--gfm-z) + 2);
 		width: var(--gfm-touch);
 		height: var(--gfm-touch);
@@ -513,6 +583,67 @@
 	html.gfm .banner1 {
 		position: static;
 		margin: var(--gfm-gap) auto;
+	}
+
+	/* --- dialogs (rewards, loot, "attack anyway?") ---
+	   The game places them at desktop positions (inline left: 651px, or
+	   left: 150px for the loot modal), off a phone screen, in 618 px frames.
+	   Shown or hidden by the game as before; only placed and sized here:
+	   between the top of the screen and the dock, scrolling if long. */
+	html.gfm .cancel_confirm,
+	html.gfm #blackoutDialog.loot-modal {
+		position: fixed !important;
+		left: var(--gfm-gap) !important;
+		right: var(--gfm-gap) !important;
+		top: var(--gfm-gap) !important;
+		z-index: calc(var(--gfm-z) + 3) !important;
+		width: auto !important;
+		max-height: calc(100% - var(--gfm-dock-h) - var(--gfm-gap) * 2);
+		overflow-y: auto;
+		float: none;
+		box-sizing: border-box;
+	}
+	html.gfm .cancel_confirm .blackoutDialog_header,
+	html.gfm .cancel_confirm .blackoutDialog_body,
+	html.gfm .cancel_confirm .blackoutDialog_footer,
+	html.gfm #blackoutDialog.loot-modal .blackoutDialog_header,
+	html.gfm #blackoutDialog.loot-modal .blackoutDialog_body,
+	html.gfm #blackoutDialog.loot-modal .blackoutDialog_footer {
+		box-sizing: border-box;
+		width: auto !important;
+		background-size: 100% 100%;
+	}
+	html.gfm .cancel_confirm .blackoutDialog_header,
+	html.gfm #blackoutDialog.loot-modal .blackoutDialog_header {
+		height: auto;
+		padding: 28px var(--gfm-gap) 8px;
+	}
+	html.gfm .cancel_confirm .blackoutDialog_body,
+	html.gfm #blackoutDialog.loot-modal .blackoutDialog_body {
+		padding: 0 16px;
+		overflow: hidden;
+	}
+	html.gfm .cancel_confirm .blackoutDialog_footer,
+	html.gfm #blackoutDialog.loot-modal .blackoutDialog_footer {
+		height: 28px;
+	}
+	html.gfm .cancel_confirm .blackoutDialog_text,
+	html.gfm #blackoutDialog.loot-modal #dialogTxt {
+		width: auto !important;
+		float: none;
+		margin-top: 0;
+	}
+	html.gfm .cancel_confirm .blackoutDialog_icon > img {
+		width: 48px;
+		margin: 0 8px 0 0;
+	}
+	html.gfm .cancel_confirm table {
+		width: 100% !important;
+		margin-left: 0 !important;
+	}
+	html.gfm .cancel_confirm .awesome-button,
+	html.gfm #blackoutDialog.loot-modal .awesome-button {
+		min-height: var(--gfm-touch);
 	}
 
 	/* --- tooltips fit the screen --- */

@@ -73,10 +73,18 @@ test('header: no overlaps, vanilla and with GCA', async () => {
 	}
 });
 
+test('every sub-tab and an open dialog are on screen at 360 px', async () => {
+	await page.setViewport({ ...PHONE, width: 360 });
+	const m = await open('location');
+	await page.setViewport(PHONE);
+	assert.deepEqual(m.tabsOffScreen, []);
+	assert.deepEqual(m.dialogsOffScreen, []);
+});
+
 test('dock at the bottom of the phone screen, vanilla and with GCA', async () => {
 	for (const gca of [false, true]) {
 		const m = await open('location', { gca });
-		assert.equal(m.dockCount, 6, `gca=${gca}`);
+		assert.equal(m.dockCount, 10, `gca=${gca}`);
 		assert.deepEqual(m.outOfDock, [], `gca=${gca}`);
 	}
 });

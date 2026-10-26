@@ -30,9 +30,22 @@
 	html.gfm .attacked_timers_back::before {
 		display: none;
 	}
-	html.gfm .attacked_timers_table {
-		width: auto;
-		margin: 0;
+	/* its 2 × 2 table → one line of four timers */
+	html.gfm #header_game > .attacked_timers_back {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px 10px;
+	}
+	html.gfm .attacked_timers_table,
+	html.gfm .attacked_timers_table tbody,
+	html.gfm .attacked_timers_table tr {
+		display: contents;
+	}
+	html.gfm .attacked_timers_table td {
+		display: inline-flex;
+		align-items: center;
+		white-space: nowrap;
+		font-size: 11px;
 	}
 	html.gfm #header_game > #cooldown_bar_ga {
 		grid-column: span 2;

@@ -13,6 +13,7 @@ test('only static files from the game CDN, gfsrv and GCA are fetched', async () 
 	const { isAllowedAsset } = await assets();
 	assert.ok(isAllowedAsset('https://s311-en.gladiatus.gameforge.com/cdn/img/menu.png'));
 	assert.ok(isAllowedAsset('https://gf3.geo.gfsrv.net/cdnb1/5fd403b4efa8ea7bc3ca5a852bfce9.jpg'));
+	assert.ok(isAllowedAsset('https://gf2.geo.gfsrv.net/cdnae/c326c1586bef7a0a9d7ef57b64648c.sprites'));
 	assert.ok(isAllowedAsset('https://raw.githubusercontent.com/DinoDevs/GladiatusCrazyAddon/v4.3.12/source/core/resources/interface/menu_items.png'));
 	// game pages, scripts, other hosts: never
 	assert.ok(!isAllowedAsset('https://s311-en.gladiatus.gameforge.com/game/index.php?mod=overview'));

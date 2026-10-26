@@ -20,6 +20,10 @@ body { margin: 0; font: 12px Arial, sans-serif; }
 #cooldown_bar_ct { left: 660px; top: 140px; width: 110px; }
 ul#mainnav { position: absolute; left: 393px; top: 190px; width: 573px; margin: 0; padding: 0; list-style: none; }
 ul#mainnav table { position: relative; top: 4px; }
+.awesome-tabs { display: inline-block; padding: 2px 6px; border: 3px solid #501706; border-bottom: 0; }
+.cancel_confirm { position: fixed; left: 0; top: 0; display: none; float: left; }
+.blackoutDialog_header, .blackoutDialog_footer { width: 618px; height: 64px; }
+.blackoutDialog_body { width: 518px; padding: 0 50px; }
 #main { width: 920px; }
 #sidebar { float: left; width: 222px; padding: 0 24px; }
 #mainmenu a.menuitem { display: block; height: 24px; padding-top: 3px; background: url(/cdn/img/menu.png) no-repeat 0 0; }
@@ -99,14 +103,17 @@ export function shellPage(bodyId, options = {}) {
 		<div id="header_values_hp"${gca ? ' class="header_values_hp-fixed-bar"' : ''}><div id="header_values_hp_percent">80%</div>HP 1200 / 1500</div>
 		<div id="header_values_xp">XP 40 %</div>
 		<div id="header_values_pve" class="header_box_big"><div><div id="icon_expeditionpoints" class="headericon_big"></div><div class="headervalue_big">36 / 36</div></div><br class="clearfloat"><div><div id="icon_dungeonpoints" class="headericon_big"></div><div class="headervalue_big">24 / 24</div></div></div>
+		<div id="header_values_pvp" class="header_box_big"><div><div id="icon_arena" class="headericon_big"></div><div class="headervalue_big">5</div></div><br class="clearfloat"><div><div id="icon_grouparena" class="headericon_big"></div><div class="headervalue_big">7</div></div></div>
 		${['expedition', 'dungeon', 'arena', 'ct'].map((c) => `<div id="cooldown_bar_${c}" class="cooldown_bar"><div class="cooldown_bar_fill"></div><a class="cooldown_bar_link" href="#"></a>${c}</div>`).join('\n\t\t')}
-		<ul id="mainnav"><li><table><tr>${[1, 2, 3, 4, 5, 6].map((n) => `<td><a href="#">Sub-tab ${n}</a></td>`).join('')}</tr></table></li></ul>
+		<ul id="mainnav"><li><table><tr>${['Arena', 'Provinciarum Arena', 'Circus Turma', 'Circus Provinciarum'].map((t) => `<td><a class="awesome-tabs" href="#">${t}</a></td>`).join('')}</tr></table></li></ul>
 	</div>
 	<div id="main"><div id="main_inner">
 		<div id="sidebar"><div id="sidebar_inner"><div id="mainmenu">
 			${['Overview', 'Messages', 'Pantheon', 'Guild', 'Highscore'].map((m) => `<a class="menuitem" href="#">${m}</a>`).join('')}
 		</div></div></div>
-		<div id="content">${CONTENT[bodyId] || ''}</div>
+		<div id="content">${CONTENT[bodyId] || ''}
+			<div id="blackoutDialognotification" class="cancel_confirm" style="display: block; left: 651px; top: 329px; z-index: 501;"><div class="blackoutDialog_header">Congratulations!</div><div class="blackoutDialog_body"><div class="blackoutDialog_text">A reward.</div><input type="button" class="awesome-button" value="Yes"></div><div class="blackoutDialog_footer"></div></div>
+		</div>
 	</div></div>
 	<div id="footer"><div id="footer_inner"><a href="#">Legal notice</a></div></div>
 </div><div id="banner_right"></div></div>
@@ -164,10 +171,14 @@ export function measure() {
 	const b = button && button.getBoundingClientRect();
 	const atButton = b && document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
 	const fixedBar = document.getElementById('topFixedBar');
-	// the bottom dock: HP, points and cooldown buttons, in the lowest 100 px
-	const dock = [...document.querySelectorAll('#header_values_hp, #header_values_pve, #header_game .cooldown_bar')]
+	// the bottom dock: HP, XP, points, ranks and cooldown buttons, in the lowest 110 px
+	const dock = [...document.querySelectorAll('#header_values_hp, #header_values_xp, #header_values_pve > div, #header_values_pvp > div, #header_game .cooldown_bar')]
 		.map((el) => ({ id: el.id, r: el.getBoundingClientRect() }));
-	const outOfDock = dock.filter((d) => d.r.top < window.innerHeight - 100 || d.r.bottom > window.innerHeight).map((d) => d.id);
+	const outOfDock = dock.filter((d) => d.r.top < window.innerHeight - 110 || d.r.bottom > window.innerHeight).map((d) => d.id);
+	// tabs and dialogs that reach past the right edge of the screen
+	const offRight = (sel) => [...document.querySelectorAll(sel)]
+		.filter((el) => { const r = el.getBoundingClientRect(); return r.width && (r.right > html.clientWidth + 1 || r.left < 0); })
+		.map((el) => el.id || el.textContent.trim());
 	const menuItems = [...document.querySelectorAll('#mainmenu .menuitem')].map((el) => ({
 		height: el.getBoundingClientRect().height,
 		sprite: /url\(/.test(getComputedStyle(el).backgroundImage),
@@ -179,6 +190,8 @@ export function measure() {
 		atButton: atButton && (atButton.id || atButton.className),
 		dockCount: dock.length,
 		outOfDock,
+		tabsOffScreen: offRight('#mainnav a'),
+		dialogsOffScreen: offRight('.cancel_confirm'),
 		menuItems,
 		fixedBarShown: !!fixedBar && getComputedStyle(fixedBar).display !== 'none',
 		clipped,

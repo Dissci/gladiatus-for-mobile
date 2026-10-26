@@ -269,13 +269,15 @@ desktop with the add-on installed looks identical to vanilla.
 | Element | Desktop | GfM |
 |---|---|---|
 | `#wrapper_game`, `#container_game`, `#main`, `#main_inner` | 960/920 px fixed | `min-width:0; width:auto` |
-| `#header_game` (absolute children) | 920×224 art | Top: CSS grid "status bar": links; message icons, gold, level; XP bar, arena ranks; GCA extras; sub-tabs. Bottom: a fixed **dock** (`position: fixed` on the game's own elements, no DOM moves, so the game and GCA keep updating them): ☰, HP bar, expedition/dungeon points; then the four cooldown bars as equal buttons (still the game's own links) |
-| `ul#mainnav` (module sub-tabs, a table inside!) | absolute, left 393 px | static, horizontal scroll strip with `scroll-snap`, 44 px tall |
+| `#header_game` (absolute children) | 920×224 art | Top: CSS grid "status bar": links; message icons, gold, rubies, level; GCA extras; sub-tabs. Bottom: a fixed **dock** (`position: fixed` on the game's own elements, no DOM moves, so the game and GCA keep updating them): ☰, HP bar, XP bar; then the four cooldown bars as equal buttons (still the game's own links), each under its expedition/dungeon points or arena/circus rank |
+| `ul#mainnav` (module sub-tabs, a table inside!) | absolute, left 393 px | static, one-line horizontal scroll strip with `scroll-snap`, 44 px tabs sized to their label |
+| `#main` background | 920 px art, sidebar pillar on the left | offset −280 px: parchment only |
 | `#sidebar` / `#mainmenu` | 270 px left column | **off-canvas drawer.** A "☰" button (in the dock) toggles `html.gfm-menu-open` (a class toggle only). Entries are GfM's own 44 px buttons: the game's are 27 px slices of one sprite (`menu.png`, GCA's `menu_items.png`) and show the next slice at any other height |
 | `#content` | 540 px + 110 px padding | fit: 540 px, padding 0, centred. Fluid: `width:auto`, 8 px padding |
 | `#footer`, `#footer_background` | 362 px absolute art | static, compact, **legal links kept** |
 | `#banner_right`, `.banner1` | absolute at x = 882 | static block under the content |
-| `#mmonetbar` | fixed Gameforge bar | kept; height accounted for in `top` offsets |
+| `.cancel_confirm`, `#blackoutDialog.loot-modal` (dialogs) | fixed / absolute at desktop positions (`left: 651px`), 618 px frames | fixed between the top of the screen and the dock, full width, scrolls if long |
+| `#mmonetbar` | fixed Gameforge bar | kept, in the flow at the top, one 32 px line: logo, country as a flag, "More games" |
 | `#buffbar` | absolute icons | horizontal row under the status bar |
 
 ### 4.4 Content adaptations (fluid pages)

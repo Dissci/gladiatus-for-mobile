@@ -32,7 +32,8 @@
 				"styles/pages/dungeon.css",
 				"styles/pages/quests.css",
 				"styles/pages/missions.css",
-				"styles/pages/messages.css"
+				"styles/pages/messages.css",
+				"styles/pages/highscore.css"
 			]
 		}
 	]

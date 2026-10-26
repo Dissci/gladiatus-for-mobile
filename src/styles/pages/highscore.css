@@ -1,0 +1,60 @@
+/*
+ * Highscore: an 8-column table (rank, name, level, honour, fame, wins,
+ * victories, gold) of about 500 px, wider than a phone, so the last columns
+ * looked cut off at the edge. Tighter cells and smaller text bring it to
+ * about 445 px; the rest scrolls sideways with the rank and name pinned on the
+ * left (and a shadow at their edge), so every row stays readable. No column is
+ * hidden.
+ */
+
+@media (max-width: 899px) {
+	html.gfm-page-highscore #content table.section-like th,
+	html.gfm-page-highscore #content table.section-like td {
+		padding: 3px 2px;
+		font-size: 11px;
+		white-space: normal;
+	}
+	/* the sort arrow sits in 10 px of padding on the right of each header */
+	html.gfm-page-highscore #content table.section-like tr:first-child > th a {
+		padding-right: 9px;
+	}
+	html.gfm-page-highscore #content table.section-like td.ellipsis {
+		max-width: 96px !important;
+	}
+	/* language flags under the name instead of beside it */
+	html.gfm-page-highscore #content table.section-like .floatEnd {
+		display: block;
+		float: none;
+	}
+	/* the table's 10 px side margins */
+	html.gfm-page-highscore #content .gfm-scroll {
+		margin: 0 -10px;
+	}
+
+	/* rank and name stay in view while the numbers scroll. Sticky cells need
+	   an opaque background: the game's row, header and own-row colours. */
+	html.gfm-page-highscore #content table.section-like tr > :nth-child(1),
+	html.gfm-page-highscore #content table.section-like tr > :nth-child(2) {
+		position: sticky;
+		z-index: 1;
+		background-color: #eddac4;
+	}
+	html.gfm-page-highscore #content table.section-like tr > th:nth-child(-n+2) {
+		background-color: #dbcba5;
+	}
+	html.gfm-page-highscore #content table.section-like tr.highlight > :nth-child(-n+2) {
+		background-color: #fdc733;
+	}
+	html.gfm-page-highscore #content table.section-like tr > :nth-child(2) {
+		box-shadow: 3px 0 4px -2px rgba(0, 0, 0, 0.35);
+	}
+	html.gfm-page-highscore #content table.section-like tr > :nth-child(1) {
+		left: 0;
+		box-sizing: border-box;
+		width: 28px;
+		min-width: 28px;
+	}
+	html.gfm-page-highscore #content table.section-like tr > :nth-child(2) {
+		left: 28px;
+	}
+}

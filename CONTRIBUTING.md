@@ -71,6 +71,9 @@ images.** They contain your session token and Gameforge's copyrighted assets.
   click on a tap on anything that is not a link, form field or label.
 - Check header and menu changes with `?gca=1` in the preview: the saved pages
   do not include GCA's stylesheet.
+- Many game buttons and menu entries are fixed-size slices of one sprite
+  image (`menu.png`, `interface.png`). Never make them taller or wider: draw
+  them yourself (see the drawer entries and `input.button1` in the CSS).
 - Prefer the game's stable IDs over class chains. Touch targets are at least
   `var(--gfm-touch)` (44 px).
 - Tabs for indentation, one selector per line.
