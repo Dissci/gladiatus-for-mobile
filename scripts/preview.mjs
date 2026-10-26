@@ -170,7 +170,9 @@ export function gameStylesheet(dir, missing) {
 }
 
 function indexPage(files) {
-	const rows = files.map((f) => `<li><a href="/${encodeURI(f)}">${f}</a> <a class="off" href="/${encodeURI(f)}?gca=1">with GCA</a> <a class="off" href="/${encodeURI(f)}?gfm=0">without GfM</a></li>`);
+	// the saves contain GCA's HTML, so the main link adds GCA's stylesheet:
+	// without it GCA's panels show unstyled, which no player sees
+	const rows = files.map((f) => `<li><a href="/${encodeURI(f)}?gca=1">${f}</a> <a class="off" href="/${encodeURI(f)}?gfm=0&amp;gca=1">without GfM</a> <a class="off" href="/${encodeURI(f)}">without GCA's styles</a></li>`);
 	const shots = existsSync(join(FIXTURES, SHOTS_DIR, 'index.html'))
 		? `<p><a href="/${SHOTS_DIR}/index.html">Screenshots</a></p>` : '';
 	return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">

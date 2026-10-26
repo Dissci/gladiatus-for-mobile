@@ -114,7 +114,8 @@ page is already a snapshot of the DOM after the game and GCA ran. Add
 `?gfm=0` to a page URL to see it without GfM, `?scripts=1` to keep its
 scripts (the game's touch handler, for example), or `?gca=1` to add Gladiatus
 Crazy Addon's stylesheet. Saved pages contain GCA's HTML but not its CSS, so
-use `?gca=1` for anything near the header or menu. It is downloaded once from
+the start page links every page with `?gca=1`; without it GCA's panels show
+unstyled, which no player ever sees. GCA's stylesheet is downloaded once from
 GCA's GitHub into `fixtures/_gca/`. The game's images and GCA's are
 downloaded once, without cookies, into `fixtures/_assets/`, so pages look as
 they do in the game.
