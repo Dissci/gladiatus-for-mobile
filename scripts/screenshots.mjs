@@ -7,8 +7,11 @@
 //   npm run shots -- expedition 390   only pages whose path contains "expedition", at 390 px
 //   npm run shots -- --approve        the last run becomes the baseline (same filters work)
 //
-// Each view is taken three ways: GfM, GfM with GCA's stylesheet, and without
-// GfM (for reference, not compared). Images come from fixtures/_assets/
+// Each view is taken with GfM and GCA's stylesheet (compared), and without
+// GfM (for reference, not compared). The saved pages were made with GCA, so
+// they contain GCA's HTML: without GCA's stylesheet they show GCA's panels
+// unstyled, which no player ever sees. GfM without GCA is covered by the
+// browser tests (tests/e2e/). Images come from fixtures/_assets/
 // (scripts/assets.mjs); anything else outside the preview server is blocked.
 //
 // Output in fixtures/_shots/: current/ (this run), baseline/ (approved),
@@ -23,8 +26,8 @@ import { comparePng } from './compare.mjs';
 import { FIXTURES, SHOTS_DIR, listFixtures, startServer } from './preview.mjs';
 
 const WIDTHS = [360, 390, 412];
-const VARIANTS = { gfm: '', gca: '?gca=1', off: '?gfm=0' };
-const COMPARED = ['gfm', 'gca'];
+const VARIANTS = { gca: '?gca=1', off: '?gfm=0&gca=1' };
+const COMPARED = ['gca'];
 
 const args = process.argv.slice(2);
 const approve = args.includes('--approve');
@@ -168,7 +171,7 @@ server.close();
 // sideways scroll, or content cut off at the edge, whichever is worse
 const overflow = (m) => Math.max(0, m.scroll - m.layout, m.clipped || 0);
 const views = rows.flatMap((r) => COMPARED.map((v) => ({ ...r[v], file: r.file, width: r.width, variant: v })));
-const label = (v) => `${v.file} · ${v.width} px · ${v.variant === 'gca' ? 'with GCA' : 'GfM'}`;
+const label = (v) => `${v.file} · ${v.width} px`;
 const img = (dir, name, caption) => `<figure><figcaption>${caption}</figcaption><a href="${dir}/${name}"><img src="${dir}/${name}" loading="lazy"></a></figure>`;
 const note = (v) => (overflow(v) ? `<p class="bad">sticks out by ${overflow(v)} px (worst: ${v.worst})</p>` : '');
 const changed = views.filter((v) => v.status === 'changed');
@@ -197,7 +200,7 @@ for (const v of views) {
 }
 const bad = (variant) => views.filter((v) => v.variant === variant && overflow(v)).length;
 const count = rows.length;
-console.log(`\nOverflow: ${bad('gfm')} / ${count} views without GCA, ${bad('gca')} / ${count} with GCA scroll sideways or cut content off.`);
+console.log(`\nOverflow: ${bad('gca')} / ${count} views scroll sideways or cut content off.`);
 console.log(`Screenshots: ${changed.length} changed, ${added.length} new, ${same.length} unchanged. Gallery: npm run preview → /${SHOTS_DIR}/index.html`);
 if (unstable) console.log(`${unstable} of the changed views came out differently on a second take too: possibly render noise, check them by eye.`);
 if (changed.length || added.length) console.log('If the changes are intended: npm run shots -- --approve');

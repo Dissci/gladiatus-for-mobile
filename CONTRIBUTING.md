@@ -46,7 +46,8 @@ pointer events. It must follow these rules:
 5. Look at it with `npm run preview` in Firefox responsive design mode
    (the server listens on 127.0.0.1 only).
 6. Run `npm run shots` (all pages, about 3 minutes). It compares every page
-   at 360, 390 and 412 px, with and without GCA, with the approved
+   at 360, 390 and 412 px (with GCA's styles, as the pages were saved
+   with GCA) with the approved
    screenshots. Open the gallery: every changed view must be one you meant to
    change. Then `npm run shots -- --approve`. Do this for every CSS change,
    not only for the page you worked on.

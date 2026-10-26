@@ -589,15 +589,19 @@
 	   The game places them at desktop positions (inline left: 651px, or
 	   left: 150px for the loot modal), off a phone screen, in 618 px frames.
 	   Shown or hidden by the game as before; only placed and sized here:
-	   between the top of the screen and the dock, scrolling if long. */
+	   centred between the top of the screen and the dock (inset + auto
+	   margins + fit-content height), scrolling if long. */
 	html.gfm .cancel_confirm,
 	html.gfm #blackoutDialog.loot-modal {
 		position: fixed !important;
 		left: var(--gfm-gap) !important;
 		right: var(--gfm-gap) !important;
 		top: var(--gfm-gap) !important;
+		bottom: calc(var(--gfm-dock-h) + var(--gfm-gap)) !important;
 		z-index: calc(var(--gfm-z) + 3) !important;
 		width: auto !important;
+		height: fit-content;
+		margin: auto 0;
 		max-height: calc(100% - var(--gfm-dock-h) - var(--gfm-gap) * 2);
 		overflow-y: auto;
 		float: none;
@@ -618,9 +622,11 @@
 		height: auto;
 		padding: 28px var(--gfm-gap) 8px;
 	}
+	/* the frame images have about 5 % transparent edge on each side, and the
+	   scroll's rollers inside it: keep the content on the parchment */
 	html.gfm .cancel_confirm .blackoutDialog_body,
 	html.gfm #blackoutDialog.loot-modal .blackoutDialog_body {
-		padding: 0 16px;
+		padding: 0 9%;
 		overflow: hidden;
 	}
 	html.gfm .cancel_confirm .blackoutDialog_footer,
@@ -633,9 +639,35 @@
 		float: none;
 		margin-top: 0;
 	}
-	html.gfm .cancel_confirm .blackoutDialog_icon > img {
+	/* icons: 65 px with 20 px hspace on desktop */
+	html.gfm .cancel_confirm .blackoutDialog_icon > img,
+	html.gfm #blackoutDialog.loot-modal .blackoutDialog_icon > img {
 		width: 48px;
-		margin: 0 8px 0 0;
+		height: auto;
+		margin: 0 8px 4px 0;
+	}
+	/* the loot modal: its buttons were pinned over the text (absolute,
+	   bottom: 80px) and are 159 × 26 px sprite slices (interface.png) */
+	html.gfm #blackoutDialog.loot-modal #dialogTxt {
+		min-height: 0 !important;
+	}
+	html.gfm #blackoutDialog.loot-modal .action_buttons {
+		position: static;
+		flex-wrap: wrap;
+		gap: 6px;
+		width: auto;
+		margin-top: var(--gfm-gap);
+	}
+	html.gfm #blackoutDialog.loot-modal .loot-button {
+		flex: 1 1 auto;
+		width: auto;
+		min-height: var(--gfm-touch);
+		padding: 0 12px;
+		border: 1px solid #4a3615;
+		border-radius: 4px;
+		background: linear-gradient(#c3ab6f, #886933);
+		color: #2b1d10;
+		font-size: 13px;
 	}
 	html.gfm .cancel_confirm table {
 		width: 100% !important;

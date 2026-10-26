@@ -62,7 +62,7 @@ npm run test:e2e  # the add-on in real Firefox + the userscript in Chrome phone 
 npm run build     # dist/extension/ and dist/gladiatus-for-mobile.user.js
 npm run lint      # web-ext lint
 npm run preview   # saved pages from fixtures/ with GfM applied, http://127.0.0.1:8560/
-npm run shots     # every saved page at 360/390/412 px, with and without GCA, compared with the approved set
+npm run shots     # every saved page at 360/390/412 px (with GCA's styles), compared with the approved set
 npm run shots -- --approve   # the last run becomes the approved set
 npm start         # desktop Firefox on the live game; responsive design mode (Ctrl+Shift+M)
 npm run android   # Firefox on a USB-connected Android phone (adb), see below
@@ -122,7 +122,7 @@ they do in the game.
 ### Checking a layout change on every page
 
 ```sh
-npm run shots                 # ~3 min: 37 pages × 360/390/412 px × (GfM, GfM + GCA)
+npm run shots                 # ~2 min: 37 pages × 360/390/412 px, GfM + GCA's styles
 npm run shots -- expedition   # only pages whose path contains "expedition"
 npm run shots -- --approve    # accept the last run as the new reference
 ```

@@ -142,6 +142,33 @@ export function listFixtures(dir = FIXTURES) {
 	return walk(dir).sort();
 }
 
+/**
+ * A saved page whose `<name>_files/` folder is missing (main_page.html was
+ * saved without it) would render unstyled. The game's stylesheets are the
+ * same on every page, so a missing `<page>_files/game.css` (layout, sprites,
+ * jquery-ui, chat) is served from another saved page: `game.css` or a
+ * browser-renamed `game_Nyn9.css`, the newest found.
+ */
+export function gameStylesheet(dir, missing) {
+	const name = /_files[\\/]([a-z-]+?)(?:_[A-Za-z0-9-]+)?\.css$/i.exec(missing);
+	if (!name) return null;
+	const pattern = new RegExp(`^${name[1]}(_[A-Za-z0-9-]+)?\\.css$`, 'i');
+	let best = null;
+	const walk = (d) => {
+		for (const entry of readdirSync(d, { withFileTypes: true })) {
+			const path = join(d, entry.name);
+			if (entry.isDirectory()) {
+				if (entry.name !== SHOTS_DIR && !entry.name.startsWith('_')) walk(path);
+			} else if (pattern.test(entry.name) && /_files$/.test(d)) {
+				const time = statSync(path).mtimeMs;
+				if (!best || time > best.time) best = { path, time };
+			}
+		}
+	};
+	walk(dir);
+	return best && best.path;
+}
+
 function indexPage(files) {
 	const rows = files.map((f) => `<li><a href="/${encodeURI(f)}">${f}</a> <a class="off" href="/${encodeURI(f)}?gca=1">with GCA</a> <a class="off" href="/${encodeURI(f)}?gfm=0">without GfM</a></li>`);
 	const shots = existsSync(join(FIXTURES, SHOTS_DIR, 'index.html'))
@@ -173,7 +200,8 @@ export function startServer({ port = 8560, host = '127.0.0.1', dir = FIXTURES } 
 			});
 			return;
 		}
-		const file = normalize(join(dir, decodeURIComponent(url.pathname)));
+		let file = normalize(join(dir, decodeURIComponent(url.pathname)));
+		if (file.startsWith(dir + sep) && !existsSync(file)) file = gameStylesheet(dir, file) || file;
 		if (!file.startsWith(dir + sep) || !existsSync(file) || !statSync(file).isFile() || relative(dir, file).startsWith('_gca')) {
 			res.writeHead(404, { 'content-type': 'text/plain' });
 			res.end('not found');

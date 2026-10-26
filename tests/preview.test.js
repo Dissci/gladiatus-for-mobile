@@ -68,3 +68,22 @@ test('GCA stylesheet goes to the top of <head> and cannot close its element earl
 	assert.ok(out.indexOf('id="gca-style"') < out.indexOf('game.css'));
 	assert.equal(out.match(/<\/style>/g).length, 1);
 });
+
+test('a save without its _files folder gets the game stylesheets of another save', async () => {
+	const { gameStylesheet } = await preview();
+	const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = require('node:fs');
+	const { join } = require('node:path');
+	const { tmpdir } = require('node:os');
+	const dir = mkdtempSync(join(tmpdir(), 'gfm-'));
+	try {
+		mkdirSync(join(dir, 'arena', 'arena_files'), { recursive: true });
+		writeFileSync(join(dir, 'arena', 'arena_files', 'game_Nyn9.css'), 'a{}');
+		writeFileSync(join(dir, 'arena', 'arena_files', 'sprites.css'), 'b{}');
+		assert.equal(gameStylesheet(dir, join(dir, 'main_page_files', 'game.css')), join(dir, 'arena', 'arena_files', 'game_Nyn9.css'));
+		assert.equal(gameStylesheet(dir, join(dir, 'main_page_files', 'sprites.css')), join(dir, 'arena', 'arena_files', 'sprites.css'));
+		assert.equal(gameStylesheet(dir, join(dir, 'main_page_files', 'chat.css')), null, 'nothing to fall back to');
+		assert.equal(gameStylesheet(dir, join(dir, 'main_page_files', 'game.js')), null, 'stylesheets only');
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});

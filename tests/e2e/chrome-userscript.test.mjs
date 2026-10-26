@@ -23,7 +23,8 @@ before(async () => {
 		if (request.url().startsWith(GAME_URL)) {
 			const mod = new URL(request.url()).searchParams.get('mod') || 'overview';
 			const gca = new URL(request.url()).searchParams.has('gca');
-			const body = shellPage(BODY_ID[mod] || 'overviewPage', { beforeHead: `<script>${userscript}</script>`, gca });
+			const dialog = new URL(request.url()).searchParams.has('dialog');
+			const body = shellPage(BODY_ID[mod] || 'overviewPage', { beforeHead: `<script>${userscript}</script>`, gca, dialog });
 			request.respond({ status: 200, contentType: 'text/html; charset=utf-8', body });
 		} else {
 			request.abort();
@@ -75,7 +76,7 @@ test('header: no overlaps, vanilla and with GCA', async () => {
 
 test('every sub-tab and an open dialog are on screen at 360 px', async () => {
 	await page.setViewport({ ...PHONE, width: 360 });
-	const m = await open('location');
+	const m = await open('location', { dialog: true });
 	await page.setViewport(PHONE);
 	assert.deepEqual(m.tabsOffScreen, []);
 	assert.deepEqual(m.dialogsOffScreen, []);

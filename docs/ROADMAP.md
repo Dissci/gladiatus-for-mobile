@@ -16,7 +16,8 @@ and sending screenshots did not scale: a fix on one page broke another
 unnoticed. Now:
 
 1. `npm run shots` (about 3 minutes) takes every saved page at 360 / 390 /
-   412 px, with GfM and with GfM + GCA's stylesheet (222 compared views), with
+   412 px with GfM and GCA's stylesheet (111 compared views; the pages were
+   saved with GCA, so without its stylesheet GCA's panels show unstyled), with
    **the game's and GCA's real images** (cached in `fixtures/_assets/`), and
    compares each with the last approved screenshot. The gallery
    (`npm run preview` → `/_shots/index.html`) shows only what changed:
@@ -66,6 +67,14 @@ Fixed (see Done). **The main page (overview) save is incomplete**: its
 original, so it renders unstyled. It needs saving again ("Web page,
 complete").
 
+Third review: the treasury dialog's icon sat on the frame and the dialog
+was not centred; the nest search dialog's buttons were stretched sprites
+over the text; the main page was unstyled; the packages filter looked
+broken. The last two were test artefacts: the main page has no saved
+stylesheets (the preview now borrows the game's from another save), and
+the plain "GfM" screenshots showed GCA's HTML without GCA's stylesheet,
+which no player sees. The screenshots now always include GCA's stylesheet.
+
 **Re-test on the phone is next.**
 
 **Overflow report (`npm run shots`, 37 saved pages × 360 / 390 / 412 px = 111 views).**
@@ -83,21 +92,22 @@ the screen edge, or content needs the last-resort sideways scroll inside
 | 2026-10-26 | 18 / 111, with GCA 18 / 111 | first run with real images and the GCA variant; same pages left |
 | 2026-10-26 | 18 / 111, with GCA 18 / 111 | XP and ranks in the dock, top bar clean-up, background centred; same pages left |
 | 2026-10-26 | 15 / 111, with GCA 15 / 111 | dialogs on screen (loot modal fixed); left: general goods, gods, guild, medic |
+| 2026-10-26 | 15 / 111 | from now on one variant (GfM + GCA's styles); main page now styled in the preview |
 
 | # | Step | Effort | Done when |
 |---|---|---|---|
 | 1 | **Re-test on the phone** (`npm run android`): the drawer buttons and GCA's + / > quick links; the bottom dock (HP bar, points, cooldown buttons); the header from the top and while scrolling; messages Move / Delete / Report; missions. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
 | 2 | **Header and dock polish** after the phone check: top grid (links · icons, gold, level · XP, ranks · GCA extras · tabs) and dock (☰, HP, points · 4 cooldowns) are in place, now visible with the game's images in the screenshots. Fine-tune spacing and sizes on the device | S | Header and dock readable at 360 px on the phone |
-| 3 | **Page content**, from the report: gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), merchant inventory tabs (`#inventory_nav`, fit). Re-save the main page (overview) first | M | 0 bad views |
+| 3 | **Page content**, from the report: gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), merchant inventory tabs (`#inventory_nav`, fit). Main page (overview): re-save when convenient, the preview borrows its stylesheets | M | 0 bad views |
 | 4 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
-| 5 | **Layout checks on every saved page** (testing step 3): header values do not overlap, the dock is at the bottom and covers no control, touch targets ≥ 44 px, drawer entries are not sprite slices, the drawer opens and closes. Run with `npm run shots` and before each push; each phone bug becomes a check | M | Checks run on all 37 pages, with and without GCA |
+| 5 | **Layout checks on every saved page** (testing step 3): header values do not overlap, the dock is at the bottom and covers no control, touch targets ≥ 44 px, drawer entries are not sprite slices, the drawer opens and closes. Run with `npm run shots` and before each push; each phone bug becomes a check | M | Checks run on all 37 pages |
 | 6 | **Phone screenshots without logging in** (testing step 4): the preview served over Wi-Fi, a script opens each saved page in Firefox on the phone via `adb` and takes screenshots into the same gallery. Real Firefox for Android rendering, no game server involved | M | One command gives the phone gallery |
 
 ### Done
 
 - [x] Fixture preview harness `scripts/preview.mjs` (`npm run preview`): saved pages with GfM injected, `?gfm=0` for before/after
 - [x] **Real images in the preview and the screenshots** (`scripts/assets.mjs`): the game's `/cdn/` files, `*.geo.gfsrv.net` and GCA's images (from GCA's GitHub at v4.3.12) are downloaded once, without cookies, into the git-ignored `fixtures/_assets/`. Only those hosts and only static file types; everything else stays blocked
-- [x] **Screenshot comparison** (`npm run shots`, `scripts/compare.mjs`): 222 views (37 pages × 3 widths × GfM / GfM + GCA) compared with an approved baseline, gallery of changed views with a red difference image, `--approve`, a second take for changed views against render noise. Checked: three runs in a row with 0 changes, a one-line dock change is caught on the dock only. Unit tests for the allowed hosts, cache paths, GCA image paths and the comparison
+- [x] **Screenshot comparison** (`npm run shots`, `scripts/compare.mjs`): 111 views (37 pages × 3 widths, GfM + GCA's stylesheet; first 222 with a GfM-only variant, dropped as misleading) compared with an approved baseline, gallery of changed views with a red difference image, `--approve`, a second take for changed views against render noise. Checked: three runs in a row with 0 changes, a one-line dock change is caught on the dock only. Unit tests for the allowed hosts, cache paths, GCA image paths and the comparison
 - [x] Screenshot script `scripts/screenshots.mjs` (`npm run shots`): every saved page × 360 / 390 / 412 px × with/without GfM, a side-by-side gallery and a sideways-overflow report
 - [x] Boot path verified in real Firefox. **Bug found and fixed:** `pages.js` exported on `this` and `boot.js` read `window.gfmPages`. In a Firefox content script these are different objects, so the add-on did nothing at all. Both now use `globalThis`
 - [x] Viewport tag inserted before `<head>` exists takes effect (Chrome phone emulation, both modes). Firefox Android is still to check on a device (step 6)
@@ -108,6 +118,7 @@ the screen edge, or content needs the last-resort sideways scroll inside
 - [x] Phone session 3 fixes: **drawer entries are GfM's own 44 px buttons** (gradient, border; active and premium marked) instead of the game's 27 px sprite slices, which showed two half buttons each; GCA's + / > quick links and their link rows are 44 px touch targets. **Bottom dock**: HP bar, expedition / dungeon points and the four cooldown buttons are `position: fixed` at the bottom (the game's own elements, nothing moved in the DOM), ☰ sits at the dock's left end, the page and the drawer keep room for it. The top header is about 40 % shorter: GCA's attack timers, global arena timer and header buttons are packed into the grid, sub-tabs last. Browser tests: the dock stays in the lowest 100 px (vanilla, GCA, scrolled) and drawer entries are ≥ 44 px without the sprite; both fail on the old CSS
 - [x] Gallery review fixes: **XP in the dock** next to HP (each bar with its points and percentage), and each cooldown button has its value above it: expedition and dungeon points, arena and Circus Turma ranks. **Background**: the desktop art's stone pillar showed left of the content, so everything looked shifted left; the art is now offset to show its parchment only. **Top bar**: the Gameforge bar is one 32 px line (logo, country as a flag, "More games") instead of about 105 px; GCA's four attack timers sit on one line; **sub-tabs** are one sideways-scrolling line of 44 px tabs (the packages page had 22 tabs wrapped into a 400 px grid, GCA's 17 px squeeze undone). Dark page background below the footer
 - [x] Second gallery review fixes: **sub-tabs** are a flattened, wrapping row (one cell per tab or all in one cell), so no tab is cut off; only long sets (the 22 package filters) scroll. **Dialogs** (`.cancel_confirm`, the loot modal) are placed on screen between the top and the dock instead of at their desktop position (`left: 651px`), with 44 px buttons: the treasury reward popup shows. **Old sprite buttons** (`input.button1/2/3`, e.g. "Search for opponent") drawn like awesome-buttons instead of stretched slices. **Messages**: Move / Delete / Report / Answer are a row of 44 px links inside each message. **Highscore** (`pages/highscore.css`): compact cells, rank and name pinned while the numbers scroll. Preview: protocol-relative images are fetched over https (portraits were missing). Browser tests: tabs and an open dialog stay on screen at 360 px (fails on the old CSS)
+- [x] Third gallery review fixes: **dialogs centred** between the top and the dock (inset + auto margins), content kept off the frame's transparent edges (9 % padding), icons 48 px. **Nest search (loot modal)**: buttons drawn instead of stretched 159 × 26 sprites, and in the flow below the text instead of absolute over it. Preview: a save missing its `_files/` folder borrows the game's stylesheets from another save (the main page renders). Screenshots: one compared variant, GfM + GCA's stylesheet; the reference "without GfM" also has GCA's stylesheet
 - [x] Shell-wide overflow: the Gameforge bar (`#mmoContent` 585 px), `#banner_event` and its link, the cooldown bar fills and links, the HP/XP percentages, the header link row. Header boxes are `relative` with the desktop offsets reset, so their absolute children stay inside them
 - [x] `npm run android` fixed: it targeted Firefox Nightly (`org.mozilla.fenix`) instead of the Play Store Firefox, and web-ext needs the device ID. `scripts/android.mjs` now picks the phone and the installed Firefox, and explains the usual setup errors
 

@@ -29,7 +29,7 @@ before(async () => {
 		const url = new URL(request.url());
 		if (request.url().startsWith(GAME_URL)) {
 			const mod = url.searchParams.get('mod') || 'overview';
-			request.respond({ status: 200, contentType: 'text/html; charset=utf-8', body: shellPage(BODY_ID[mod] || 'overviewPage', { gca: url.searchParams.has('gca') }) });
+			request.respond({ status: 200, contentType: 'text/html; charset=utf-8', body: shellPage(BODY_ID[mod] || 'overviewPage', { gca: url.searchParams.has('gca'), dialog: url.searchParams.has('dialog') }) });
 		} else {
 			request.abort();
 		}
@@ -112,7 +112,7 @@ test('dock: HP, XP, points, ranks and cooldowns at the bottom, also with GCA and
 });
 
 test('every sub-tab and an open dialog are on screen', async () => {
-	const m = await open('location', 360);
+	const m = await open('location', 360, { dialog: true });
 	assert.deepEqual(m.tabsOffScreen, [], 'tabs cut off at the edge');
 	assert.deepEqual(m.dialogsOffScreen, [], 'dialog at its desktop position');
 });

@@ -112,7 +112,7 @@ export function shellPage(bodyId, options = {}) {
 			${['Overview', 'Messages', 'Pantheon', 'Guild', 'Highscore'].map((m) => `<a class="menuitem" href="#">${m}</a>`).join('')}
 		</div></div></div>
 		<div id="content">${CONTENT[bodyId] || ''}
-			<div id="blackoutDialognotification" class="cancel_confirm" style="display: block; left: 651px; top: 329px; z-index: 501;"><div class="blackoutDialog_header">Congratulations!</div><div class="blackoutDialog_body"><div class="blackoutDialog_text">A reward.</div><input type="button" class="awesome-button" value="Yes"></div><div class="blackoutDialog_footer"></div></div>
+			<div id="blackoutDialognotification" class="cancel_confirm" style="display: ${options.dialog ? 'block' : 'none'}; left: 651px; top: 329px; z-index: 501;"><div class="blackoutDialog_header">Congratulations!</div><div class="blackoutDialog_body"><div class="blackoutDialog_text">A reward.</div><input type="button" class="awesome-button" value="Yes"></div><div class="blackoutDialog_footer"></div></div>
 		</div>
 	</div></div>
 	<div id="footer"><div id="footer_inner"><a href="#">Legal notice</a></div></div>
@@ -121,8 +121,9 @@ ${gca ? '<div id="topFixedBar" class="bar-fixed-bar"><a href="#">Gladiatus Crazy
 </body></html>`;
 }
 
-export function gameUrl(mod, { gca = false } = {}) {
-	return `${GAME_URL}?mod=${mod}&sh=SESSION${gca ? '&gca=1' : ''}`;
+// gca: GCA's markup and rules; dialog: an open game dialog (a modal, it covers ☰)
+export function gameUrl(mod, { gca = false, dialog = false } = {}) {
+	return `${GAME_URL}?mod=${mod}&sh=SESSION${gca ? '&gca=1' : ''}${dialog ? '&dialog=1' : ''}`;
 }
 
 // Layout facts the tests assert on, read in the page.
