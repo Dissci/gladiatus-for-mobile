@@ -44,12 +44,15 @@ pointer events. It must follow these rules:
    `fit` or `fluid`, and add a test case.
 4. Put page-specific CSS in `src/styles/pages/<mod>.css` and list it in the manifest.
 5. Look at it with `npm run preview` in Firefox responsive design mode
-   (the server listens on 127.0.0.1 only). Then run `npm run shots -- <page>`
-   and check the gallery and the overflow report at 360, 390 and 412 px.
-   Check it with and without GCA.
-6. Run `npm test` and `npm run test:e2e`. If you changed the shell, extend
+   (the server listens on 127.0.0.1 only).
+6. Run `npm run shots` (all pages, about 3 minutes). It compares every page
+   at 360, 390 and 412 px, with and without GCA, with the approved
+   screenshots. Open the gallery: every changed view must be one you meant to
+   change. Then `npm run shots -- --approve`. Do this for every CSS change,
+   not only for the page you worked on.
+7. Run `npm test` and `npm run test:e2e`. If you changed the shell, extend
    the test page in `tests/e2e/shell-page.mjs` so CI covers it.
-7. Update [docs/PAGE-INVENTORY.md](docs/PAGE-INVENTORY.md) and the
+8. Update [docs/PAGE-INVENTORY.md](docs/PAGE-INVENTORY.md) and the
    [roadmap](docs/ROADMAP.md).
 
 **Never commit saved pages, screenshots with the URL bar visible, or game
@@ -77,3 +80,6 @@ images.** They contain your session token and Gameforge's copyrighted assets.
 - `npm test` passes.
 - Fill in the PR checklist. It includes the scope rule.
 - Include before/after screenshots at phone width (crop out the URL bar).
+  The difference images from `npm run shots` (`fixtures/_shots/diff/`) show
+  reviewers exactly what changed, but check them for game assets you may not
+  share.

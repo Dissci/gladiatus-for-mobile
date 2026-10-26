@@ -11,6 +11,23 @@ on a real page, `[ ]` not started.
 Every change can now be seen in seconds without logging in (`npm run preview`,
 `npm run shots`), and CI runs the add-on in real Firefox on each push.
 
+**How a layout change is tested (since 2026-10-26).** Checking pages by hand
+and sending screenshots did not scale: a fix on one page broke another
+unnoticed. Now:
+
+1. `npm run shots` (about 3 minutes) takes every saved page at 360 / 390 /
+   412 px, with GfM and with GfM + GCA's stylesheet (222 compared views), with
+   **the game's and GCA's real images** (cached in `fixtures/_assets/`), and
+   compares each with the last approved screenshot. The gallery
+   (`npm run preview` → `/_shots/index.html`) shows only what changed:
+   approved, now, and the difference in red.
+2. If every change is intended: `npm run shots -- --approve`. A changed view
+   is taken twice, so render noise is not reported as a change.
+3. The phone is for what saved pages cannot show: finger drag-and-drop, GCA's
+   scripts, live timers. When a page looks wrong on the phone, save it into
+   `fixtures/` (Ctrl+S, then sanitize) instead of sending a screenshot: it
+   becomes a permanent test case.
+
 **Phone sessions (2026-10-24, Android 16, Firefox with GCA).**
 Session 1: the drawer could not be opened, the top of the page was a pile-up,
 and the pantheon accept / decline buttons were off screen. Session 2: the
@@ -51,18 +68,22 @@ the screen edge, or content needs the last-resort sideways scroll inside
 | 2026-10-24 | 18 / 111 | pantheon quests, missions, messages fixed after phone session 1 |
 | 2026-10-24 | 18 / 111 | header rebuilt as a grid, Gameforge bar in the flow (phone session 2); same pages left |
 | 2026-10-25 | 18 / 111 | bottom dock and drawer buttons (phone session 3); same pages left |
+| 2026-10-26 | 18 / 111, with GCA 18 / 111 | first run with real images and the GCA variant; same pages left |
 
 | # | Step | Effort | Done when |
 |---|---|---|---|
-| 1 | **Re-test on the phone** (`npm run android`): the drawer buttons and GCA's + / > quick links; the bottom dock (HP bar, points, cooldown buttons with the game's bar images, which the preview lacks); the header from the top and while scrolling; messages Move / Delete / Report; missions. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
-| 2 | **Header and dock polish** after the phone check: top grid (links · icons, gold, level · XP, ranks · GCA extras · tabs) and dock (☰, HP, points · 4 cooldowns) are in place, but icons and bars could only be checked without the game's images. Fine-tune spacing and sizes on the device | S | Header and dock readable at 360 px on the phone |
+| 1 | **Re-test on the phone** (`npm run android`): the drawer buttons and GCA's + / > quick links; the bottom dock (HP bar, points, cooldown buttons); the header from the top and while scrolling; messages Move / Delete / Report; missions. Then drag-and-drop by finger on the overview and the merchant | S | Phase 1 device check ticked |
+| 2 | **Header and dock polish** after the phone check: top grid (links · icons, gold, level · XP, ranks · GCA extras · tabs) and dock (☰, HP, points · 4 cooldowns) are in place, now visible with the game's images in the screenshots. Seen there: the Gameforge bar wraps into about 140 px at 390 px. Fine-tune spacing and sizes | S | Header and dock readable at 360 px on the phone |
 | 3 | **Page content**, from the report: gods (`#gods`), guild building map, medic (`#guild_medicus_heal`), the loot modal (`#blackoutDialog`), merchant inventory tabs (`#inventory_nav`, fit) | M | 0 bad views |
 | 4 | Footer, buff bar, banners: check each against the screenshots | S | Phase 1 items below move from `[~]` to `[x]` |
-| 5 | `npm run shots -- --gca`: the screenshot report with GCA's stylesheet (the preview already has `?gca=1`) | S | Report run with and without GCA |
+| 5 | **Layout checks on every saved page** (testing step 3): header values do not overlap, the dock is at the bottom and covers no control, touch targets ≥ 44 px, drawer entries are not sprite slices, the drawer opens and closes. Run with `npm run shots` and before each push; each phone bug becomes a check | M | Checks run on all 37 pages, with and without GCA |
+| 6 | **Phone screenshots without logging in** (testing step 4): the preview served over Wi-Fi, a script opens each saved page in Firefox on the phone via `adb` and takes screenshots into the same gallery. Real Firefox for Android rendering, no game server involved | M | One command gives the phone gallery |
 
 ### Done
 
 - [x] Fixture preview harness `scripts/preview.mjs` (`npm run preview`): saved pages with GfM injected, `?gfm=0` for before/after
+- [x] **Real images in the preview and the screenshots** (`scripts/assets.mjs`): the game's `/cdn/` files, `*.geo.gfsrv.net` and GCA's images (from GCA's GitHub at v4.3.12) are downloaded once, without cookies, into the git-ignored `fixtures/_assets/`. Only those hosts and only static file types; everything else stays blocked
+- [x] **Screenshot comparison** (`npm run shots`, `scripts/compare.mjs`): 222 views (37 pages × 3 widths × GfM / GfM + GCA) compared with an approved baseline, gallery of changed views with a red difference image, `--approve`, a second take for changed views against render noise. Checked: three runs in a row with 0 changes, a one-line dock change is caught on the dock only. Unit tests for the allowed hosts, cache paths, GCA image paths and the comparison
 - [x] Screenshot script `scripts/screenshots.mjs` (`npm run shots`): every saved page × 360 / 390 / 412 px × with/without GfM, a side-by-side gallery and a sideways-overflow report
 - [x] Boot path verified in real Firefox. **Bug found and fixed:** `pages.js` exported on `this` and `boot.js` read `window.gfmPages`. In a Firefox content script these are different objects, so the add-on did nothing at all. Both now use `globalThis`
 - [x] Viewport tag inserted before `<head>` exists takes effect (Chrome phone emulation, both modes). Firefox Android is still to check on a device (step 6)
@@ -123,7 +144,7 @@ The goal is that every page fits the screen width and the whole game can be navi
 - [ ] `input-adapter.js`: long-press → select → tap target (one gesture = one drag)
 - [ ] Bag switching while moving (tap a bag tab during selection)
 - [ ] Detect GCA's `item_move`; restyle it instead of running two adapters
-- [ ] Turn the screenshot script into a visual diff suite (compare with the previous run), vanilla × GCA
+- [x] Turn the screenshot script into a visual diff suite (compare with the approved run), vanilla × GCA
 
 ## Phase 4: reach, target v0.4 (M)
 

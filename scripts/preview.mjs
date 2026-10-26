@@ -20,12 +20,16 @@
 //                 Downloaded once from GCA's GitHub at GCA_VERSION into
 //                 fixtures/_gca/ (git-ignored; GCA is GPL-3.0).
 //
+// The game's images (/cdn/..., *.geo.gfsrv.net) and GCA's come from a cache
+// in fixtures/_assets/, filled on first use (scripts/assets.mjs).
+//
 // Local only: fixtures contain Gameforge assets and are never published.
 import { createServer } from 'node:http';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, extname, join, normalize, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readBundle } from './build.mjs';
+import { GAME_ASSET_ORIGIN, getAsset } from './assets.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const FIXTURES = join(root, 'fixtures');
@@ -107,9 +111,18 @@ export async function gcaStylesheet(dir = FIXTURES) {
 	return readFileSync(file, 'utf8');
 }
 
+/** GCA's own files (images), at the version the saved pages were made with. */
+export const GCA_RESOURCES = `https://raw.githubusercontent.com/DinoDevs/GladiatusCrazyAddon/${GCA_VERSION}/source/core/resources/`;
+export const GCA_RES_PATH = '/_gca/res/';
+
+/** GCA's CSS refers to its images relative to its resources folder. */
+export function gcaUrls(css) {
+	return css.replace(/url\(\s*(['"]?)(?!data:|[a-z]+:|\/|#)([^'")]+)\1\s*\)/gi, (m, q, path) => `url(${q}${GCA_RES_PATH}${path}${q})`);
+}
+
 /** Add GCA's stylesheet at the top of <head>, where an add-on's CSS goes. */
 export function withGca(html, gcaCss) {
-	const style = `<style id="gca-style">${gcaCss.replace(/<\/style/gi, '<\\/style')}</style>`;
+	const style = `<style id="gca-style">${gcaUrls(gcaCss).replace(/<\/style/gi, '<\\/style')}</style>`;
 	const head = /<head(\s[^>]*)?>/i.exec(html);
 	return head
 		? html.slice(0, head.index + head[0].length) + '\n' + style + html.slice(head.index + head[0].length)
@@ -147,6 +160,17 @@ export function startServer({ port = 8560, host = '127.0.0.1', dir = FIXTURES } 
 		if (url.pathname === '/') {
 			res.writeHead(200, { 'content-type': TYPES['.html'] });
 			res.end(indexPage(listFixtures(dir)));
+			return;
+		}
+		// the game's and GCA's images, from the cache in fixtures/_assets/
+		const remote = url.pathname.startsWith('/cdn/') ? GAME_ASSET_ORIGIN + url.pathname
+			: url.pathname.startsWith(GCA_RES_PATH) ? GCA_RESOURCES + url.pathname.slice(GCA_RES_PATH.length)
+				: null;
+		if (remote) {
+			getAsset(remote, dir).then((asset) => {
+				res.writeHead(asset ? 200 : 404, { 'content-type': asset ? asset.type : 'text/plain' });
+				res.end(asset ? asset.body : 'not found');
+			});
 			return;
 		}
 		const file = normalize(join(dir, decodeURIComponent(url.pathname)));

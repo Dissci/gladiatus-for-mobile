@@ -16,6 +16,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      # dev tools only (pngjs for the screenshot comparison tests); no browsers
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
       - run: npm test
       - run: npm run build
       - run: npm run lint

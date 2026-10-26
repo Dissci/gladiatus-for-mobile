@@ -62,7 +62,8 @@ npm run test:e2e  # the add-on in real Firefox + the userscript in Chrome phone 
 npm run build     # dist/extension/ and dist/gladiatus-for-mobile.user.js
 npm run lint      # web-ext lint
 npm run preview   # saved pages from fixtures/ with GfM applied, http://127.0.0.1:8560/
-npm run shots     # screenshots of every saved page at 360/390/412 px + overflow report
+npm run shots     # every saved page at 360/390/412 px, with and without GCA, compared with the approved set
+npm run shots -- --approve   # the last run becomes the approved set
 npm start         # desktop Firefox on the live game; responsive design mode (Ctrl+Shift+M)
 npm run android   # Firefox on a USB-connected Android phone (adb), see below
 ```
@@ -96,7 +97,7 @@ src/
   content/boot.js      document_start: <html> classes + viewport meta
   content/layout.js    menu drawer button, table scroll wrappers
   styles/              base shell, fluid pages, GCA compatibility, per-page CSS
-scripts/               build, preview server, screenshots, fixture sanitizer, page scanner
+scripts/               build, preview server, image cache, screenshots + comparison, fixture sanitizer, page scanner
 tests/                 node:test; tests/e2e/ runs real browsers
 docs/                  analysis, roadmap, page inventory
 ```
@@ -114,8 +115,24 @@ page is already a snapshot of the DOM after the game and GCA ran. Add
 scripts (the game's touch handler, for example), or `?gca=1` to add Gladiatus
 Crazy Addon's stylesheet. Saved pages contain GCA's HTML but not its CSS, so
 use `?gca=1` for anything near the header or menu. It is downloaded once from
-GCA's GitHub into `fixtures/_gca/`. `npm run shots` writes `fixtures/_shots/`, which you can browse from
-the preview's start page.
+GCA's GitHub into `fixtures/_gca/`. The game's images and GCA's are
+downloaded once, without cookies, into `fixtures/_assets/`, so pages look as
+they do in the game.
+
+### Checking a layout change on every page
+
+```sh
+npm run shots                 # ~3 min: 37 pages × 360/390/412 px × (GfM, GfM + GCA)
+npm run shots -- expedition   # only pages whose path contains "expedition"
+npm run shots -- --approve    # accept the last run as the new reference
+```
+
+Each view is compared with the last approved screenshot. The gallery
+(`npm run preview` → *Screenshots*) lists only the views that changed, side by
+side with the approved one and a difference image in red, so a fix on one page
+that breaks another shows up immediately. The first run has nothing to compare
+with: look through it once and approve it. All of it stays in
+`fixtures/_shots/`, which is git-ignored.
 
 ## License
 
